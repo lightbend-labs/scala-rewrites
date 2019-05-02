@@ -1,5 +1,6 @@
 package fix
 
+import scala.Console._
 import scala.collection.mutable
 import scala.compat.Platform
 import scala.collection.JavaConverters._
@@ -71,6 +72,52 @@ object Scala_2_13 {
   def ansiColorBlink: String      = AnsiColor.BLINK
   def ansiColorReversed: String   = AnsiColor.REVERSED
   def ansiColorInvisible: String  = AnsiColor.INVISIBLE
+
+  def ansiColorBlack2: String      = AnsiColor.BLACK
+  def ansiColorRed2: String        = AnsiColor.RED
+  def ansiColorGreen2: String      = AnsiColor.GREEN
+  def ansiColorYellow2: String     = AnsiColor.YELLOW
+  def ansiColorBlue2: String       = AnsiColor.BLUE
+  def ansiColorMagenta2: String    = AnsiColor.MAGENTA
+  def ansiColorCyan2: String       = AnsiColor.CYAN
+  def ansiColorWhite2: String      = AnsiColor.WHITE
+  def ansiColorBlackB2: String     = AnsiColor.BLACK_B
+  def ansiColorRedB2: String       = AnsiColor.RED_B
+  def ansiColorGreenB2: String     = AnsiColor.GREEN_B
+  def ansiColorYellowB2: String    = AnsiColor.YELLOW_B
+  def ansiColorBlueB2: String      = AnsiColor.BLUE_B
+  def ansiColorMagentaB2: String   = AnsiColor.MAGENTA_B
+  def ansiColorCyanB2: String      = AnsiColor.CYAN_B
+  def ansiColorWhiteB2: String     = AnsiColor.WHITE_B
+  def ansiColorReset2: String      = AnsiColor.RESET
+  def ansiColorBold2: String       = AnsiColor.BOLD
+  def ansiColorUnderlined2: String = AnsiColor.UNDERLINED
+  def ansiColorBlink2: String      = AnsiColor.BLINK
+  def ansiColorReversed2: String   = AnsiColor.REVERSED
+  def ansiColorInvisible2: String  = AnsiColor.INVISIBLE
+
+  def ansiColorBlack3: String      = s"[${AnsiColor.BLACK}]"
+  def ansiColorRed3: String        = s"[${AnsiColor.RED}]"
+  def ansiColorGreen3: String      = s"[${AnsiColor.GREEN}]"
+  def ansiColorYellow3: String     = s"[${AnsiColor.YELLOW}]"
+  def ansiColorBlue3: String       = s"[${AnsiColor.BLUE}]"
+  def ansiColorMagenta3: String    = s"[${AnsiColor.MAGENTA}]"
+  def ansiColorCyan3: String       = s"[${AnsiColor.CYAN}]"
+  def ansiColorWhite3: String      = s"[${AnsiColor.WHITE}]"
+  def ansiColorBlackB3: String     = s"[${AnsiColor.BLACK_B}]"
+  def ansiColorRedB3: String       = s"[${AnsiColor.RED_B}]"
+  def ansiColorGreenB3: String     = s"[${AnsiColor.GREEN_B}]"
+  def ansiColorYellowB3: String    = s"[${AnsiColor.YELLOW_B}]"
+  def ansiColorBlueB3: String      = s"[${AnsiColor.BLUE_B}]"
+  def ansiColorMagentaB3: String   = s"[${AnsiColor.MAGENTA_B}]"
+  def ansiColorCyanB3: String      = s"[${AnsiColor.CYAN_B}]"
+  def ansiColorWhiteB3: String     = s"[${AnsiColor.WHITE_B}]"
+  def ansiColorReset3: String      = s"[${AnsiColor.RESET}]"
+  def ansiColorBold3: String       = s"[${AnsiColor.BOLD}]"
+  def ansiColorUnderlined3: String = s"[${AnsiColor.UNDERLINED}]"
+  def ansiColorBlink3: String      = s"[${AnsiColor.BLINK}]"
+  def ansiColorReversed3: String   = s"[${AnsiColor.REVERSED}]"
+  def ansiColorInvisible3: String  = s"[${AnsiColor.INVISIBLE}]"
 
   def consoleReadBoolean                        = StdIn.readBoolean()
   def consoleReadByte                           = StdIn.readByte()

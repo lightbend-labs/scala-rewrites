@@ -3,6 +3,7 @@ rule = Scala_2_13
 */
 package fix
 
+import scala.Console._
 import scala.collection.mutable
 import scala.compat.Platform
 import scala.compat.Platform.{ EOL, arraycopy, currentTime }
@@ -74,6 +75,52 @@ object Scala_2_13 {
   def ansiColorBlink: String      = Console.BLINK
   def ansiColorReversed: String   = Console.REVERSED
   def ansiColorInvisible: String  = Console.INVISIBLE
+
+  def ansiColorBlack2: String      = BLACK
+  def ansiColorRed2: String        = RED
+  def ansiColorGreen2: String      = GREEN
+  def ansiColorYellow2: String     = YELLOW
+  def ansiColorBlue2: String       = BLUE
+  def ansiColorMagenta2: String    = MAGENTA
+  def ansiColorCyan2: String       = CYAN
+  def ansiColorWhite2: String      = WHITE
+  def ansiColorBlackB2: String     = BLACK_B
+  def ansiColorRedB2: String       = RED_B
+  def ansiColorGreenB2: String     = GREEN_B
+  def ansiColorYellowB2: String    = YELLOW_B
+  def ansiColorBlueB2: String      = BLUE_B
+  def ansiColorMagentaB2: String   = MAGENTA_B
+  def ansiColorCyanB2: String      = CYAN_B
+  def ansiColorWhiteB2: String     = WHITE_B
+  def ansiColorReset2: String      = RESET
+  def ansiColorBold2: String       = BOLD
+  def ansiColorUnderlined2: String = UNDERLINED
+  def ansiColorBlink2: String      = BLINK
+  def ansiColorReversed2: String   = REVERSED
+  def ansiColorInvisible2: String  = INVISIBLE
+
+  def ansiColorBlack3: String      = s"[$BLACK]"
+  def ansiColorRed3: String        = s"[$RED]"
+  def ansiColorGreen3: String      = s"[$GREEN]"
+  def ansiColorYellow3: String     = s"[$YELLOW]"
+  def ansiColorBlue3: String       = s"[$BLUE]"
+  def ansiColorMagenta3: String    = s"[$MAGENTA]"
+  def ansiColorCyan3: String       = s"[$CYAN]"
+  def ansiColorWhite3: String      = s"[$WHITE]"
+  def ansiColorBlackB3: String     = s"[$BLACK_B]"
+  def ansiColorRedB3: String       = s"[$RED_B]"
+  def ansiColorGreenB3: String     = s"[$GREEN_B]"
+  def ansiColorYellowB3: String    = s"[$YELLOW_B]"
+  def ansiColorBlueB3: String      = s"[$BLUE_B]"
+  def ansiColorMagentaB3: String   = s"[$MAGENTA_B]"
+  def ansiColorCyanB3: String      = s"[$CYAN_B]"
+  def ansiColorWhiteB3: String     = s"[$WHITE_B]"
+  def ansiColorReset3: String      = s"[$RESET]"
+  def ansiColorBold3: String       = s"[$BOLD]"
+  def ansiColorUnderlined3: String = s"[$UNDERLINED]"
+  def ansiColorBlink3: String      = s"[$BLINK]"
+  def ansiColorReversed3: String   = s"[$REVERSED]"
+  def ansiColorInvisible3: String  = s"[$INVISIBLE]"
 
   def consoleReadBoolean                        = Console.readBoolean()
   def consoleReadByte                           = Console.readByte()
