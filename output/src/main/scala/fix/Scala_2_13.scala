@@ -147,4 +147,7 @@ object Scala_2_13 {
       case 1 => "one"
     }
   }
+
+  def symbolLiteral0 = Symbol("foo")
+  def symbolLiteral1 = Symbol("foo")
 }

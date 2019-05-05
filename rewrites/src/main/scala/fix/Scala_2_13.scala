@@ -191,6 +191,10 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
           case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
         }.asPatch
       }
+
+      case t @ Lit.Symbol(sym) => {
+        Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
+      }
     }
 
     def colourReplace(interpolating: Boolean, tree: Tree, name: String) = {
