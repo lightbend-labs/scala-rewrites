@@ -175,6 +175,22 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
       case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
       case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
+
+      case t: Case => {
+        t.tokens.collect {
+          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
+        }.asPatch
+      }
+      case t: Type.Function => {
+        t.tokens.collect {
+          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
+        }.asPatch
+      }
+      case t: Importee => {
+        t.tokens.collect {
+          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
+        }.asPatch
+      }
     }
 
     def colourReplace(interpolating: Boolean, tree: Tree, name: String) = {
