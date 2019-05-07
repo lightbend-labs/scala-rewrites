@@ -4,28 +4,39 @@ import scalafix.v1._
 import scala.annotation.tailrec
 import scala.meta._
 
+object Scala_2_13 {
+  val EOL         = SymbolMatcher.exact("scala/compat/Platform.EOL.")
+  val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
+  val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
+
+  val deprecatedConsoleReadBoolean = SymbolMatcher.exact("scala/DeprecatedConsole#readBoolean().")
+  val deprecatedConsoleReadByte    = SymbolMatcher.exact("scala/DeprecatedConsole#readByte().")
+  val deprecatedConsoleReadChar    = SymbolMatcher.exact("scala/DeprecatedConsole#readChar().")
+  val deprecatedConsoleReadDouble  = SymbolMatcher.exact("scala/DeprecatedConsole#readDouble().")
+  val deprecatedConsoleReadFloat   = SymbolMatcher.exact("scala/DeprecatedConsole#readFloat().")
+  val deprecatedConsoleReadInt     = SymbolMatcher.exact("scala/DeprecatedConsole#readInt().")
+  val deprecatedConsoleReadLine    = SymbolMatcher.exact("scala/DeprecatedConsole#readLine().")
+  val deprecatedConsoleReadLine1   = SymbolMatcher.exact("scala/DeprecatedConsole#readLine(+1).")
+  val deprecatedConsoleReadLong    = SymbolMatcher.exact("scala/DeprecatedConsole#readLong().")
+  val deprecatedConsoleReadShort   = SymbolMatcher.exact("scala/DeprecatedConsole#readShort().")
+  val deprecatedConsoleReadf       = SymbolMatcher.exact("scala/DeprecatedConsole#readf().")
+  val deprecatedConsoleReadf1      = SymbolMatcher.exact("scala/DeprecatedConsole#readf1().")
+  val deprecatedConsoleReadf2      = SymbolMatcher.exact("scala/DeprecatedConsole#readf2().")
+  val deprecatedConsoleReadf3      = SymbolMatcher.exact("scala/DeprecatedConsole#readf3().")
+}
+
 final class Scala_2_13 extends SemanticRule("Scala_2_13") {
+  import Scala_2_13._
+
   override def fix(implicit doc: SemanticDocument): Patch = {
-    val EOL         = SymbolMatcher.exact("scala/compat/Platform.EOL.")
-    val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
-    val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
-
-    val deprecatedConsoleReadBoolean = SymbolMatcher.exact("scala/DeprecatedConsole#readBoolean().")
-    val deprecatedConsoleReadByte    = SymbolMatcher.exact("scala/DeprecatedConsole#readByte().")
-    val deprecatedConsoleReadChar    = SymbolMatcher.exact("scala/DeprecatedConsole#readChar().")
-    val deprecatedConsoleReadDouble  = SymbolMatcher.exact("scala/DeprecatedConsole#readDouble().")
-    val deprecatedConsoleReadFloat   = SymbolMatcher.exact("scala/DeprecatedConsole#readFloat().")
-    val deprecatedConsoleReadInt     = SymbolMatcher.exact("scala/DeprecatedConsole#readInt().")
-    val deprecatedConsoleReadLine    = SymbolMatcher.exact("scala/DeprecatedConsole#readLine().")
-    val deprecatedConsoleReadLine1   = SymbolMatcher.exact("scala/DeprecatedConsole#readLine(+1).")
-    val deprecatedConsoleReadLong    = SymbolMatcher.exact("scala/DeprecatedConsole#readLong().")
-    val deprecatedConsoleReadShort   = SymbolMatcher.exact("scala/DeprecatedConsole#readShort().")
-    val deprecatedConsoleReadf       = SymbolMatcher.exact("scala/DeprecatedConsole#readf().")
-    val deprecatedConsoleReadf1      = SymbolMatcher.exact("scala/DeprecatedConsole#readf1().")
-    val deprecatedConsoleReadf2      = SymbolMatcher.exact("scala/DeprecatedConsole#readf2().")
-    val deprecatedConsoleReadf3      = SymbolMatcher.exact("scala/DeprecatedConsole#readf3().")
-
     val handled = scala.collection.mutable.Set.empty[Tree]
+    @tailrec def recordHandled(t: Tree): Unit = {
+      handled += t
+      t match {
+        case Term.Select(_, n) => recordHandled(n)
+        case _                 => ()
+      }
+    }
 
     val globalImports = scala.collection.mutable.Set.empty[String]
     def addGlobalImport(importer: Importer) = {
@@ -37,12 +48,15 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
 
     def fixI(interpolating: Boolean): PartialFunction[Tree, Patch] = {
       def replaceTree(t: Tree, s: String) = {
-        recordTermHandled(t)
+        recordHandled(t)
         val replacement = t match {
           case _: Term.Name if interpolating => s"{$s}"
           case _                             => s
         }
         Patch.replaceTree(t, replacement)
+      }
+      def stdInReplace(tree: Tree, name: String) = {
+        replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
       }
       {
         case Term.Interpolate(_, _, args) => args.collect(fixI(true)).asPatch
@@ -78,27 +92,13 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
       }
     }
-
-    def stdInReplace(tree: Tree, name: String) = {
-      recordTermHandled(tree)
-      Patch.replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
-    }
-
-    def replaceArrow(t: Tree) = {
-      t.tokens.collect {
-        case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
-      }.asPatch
-    }
-
-    @tailrec def recordTermHandled(t: Tree): Unit = {
-      handled += t
-      t match {
-        case Term.Select(_, n) => recordTermHandled(n)
-        case _                 => ()
-      }
-    }
-
     doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixI(false))).asPatch
+  }
+
+  private def replaceArrow(t: Tree) = {
+    t.tokens.collect {
+      case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
+    }.asPatch
   }
 }
 
