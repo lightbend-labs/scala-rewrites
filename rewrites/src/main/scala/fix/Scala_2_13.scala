@@ -6,9 +6,9 @@ import scala.meta._
 
 final class Scala_2_13 extends SemanticRule("Scala_2_13") {
   override def fix(implicit doc: SemanticDocument): Patch = {
-    val EOL = SymbolMatcher.exact("scala/compat/Platform.EOL.")
+    val EOL         = SymbolMatcher.exact("scala/compat/Platform.EOL.")
     val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
-    val arraycopy = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
+    val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
 
     val deprecatedConsoleReadBoolean = SymbolMatcher.exact("scala/DeprecatedConsole#readBoolean().")
     val deprecatedConsoleReadByte    = SymbolMatcher.exact("scala/DeprecatedConsole#readByte().")
@@ -36,66 +36,58 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
     }
 
     def fixI(interpolating: Boolean): PartialFunction[Tree, Patch] = {
-      case Term.Interpolate(_, _, args) => args.collect(fixI(true)).asPatch
-
-      case EOL(i: Importee) => Patch.removeImportee(i)
-      case EOL(t: Term) =>
+      def replaceTree(t: Tree, s: String) = {
         recordTermHandled(t)
         val replacement = t match {
-          case _: Term.Name if interpolating => "{System.lineSeparator}"
-          case _                             => "System.lineSeparator"
+          case _: Term.Name if interpolating => s"{$s}"
+          case _                             => s
         }
         Patch.replaceTree(t, replacement)
-
-      case currentTime(i: Importee) => Patch.removeImportee(i)
-      case currentTime(t: Term) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.currentTimeMillis")
-
-      case arraycopy(i: Importee) => Patch.removeImportee(i)
-      case arraycopy(Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.arraycopy")
-
-      case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
-      case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
-      case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
-      case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
-      case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
-      case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
-      case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
-      case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
-      case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
-      case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
-      case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
-      case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
-      case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
-      case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
-
-      case t: Case => {
-        t.tokens.collect {
-          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
-        }.asPatch
       }
-      case t: Type.Function => {
-        t.tokens.collect {
-          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
-        }.asPatch
-      }
-      case t: Importee => {
-        t.tokens.collect {
-          case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
-        }.asPatch
-      }
+      {
+        case Term.Interpolate(_, _, args) => args.collect(fixI(true)).asPatch
 
-      case t @ Lit.Symbol(sym) => {
-        Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
+        case EOL(i: Importee) => Patch.removeImportee(i)
+        case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
+
+        case currentTime(i: Importee) => Patch.removeImportee(i)
+        case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
+
+        case arraycopy(i: Importee)      => Patch.removeImportee(i)
+        case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
+
+        case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
+        case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
+        case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
+        case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
+        case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
+        case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
+        case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
+        case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
+        case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
+        case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
+        case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
+        case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
+        case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
+        case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
+
+        case t: Case          => replaceArrow(t)
+        case t: Type.Function => replaceArrow(t)
+        case t: Importee      => replaceArrow(t)
+
+        case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
       }
     }
 
     def stdInReplace(tree: Tree, name: String) = {
       recordTermHandled(tree)
       Patch.replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
+    }
+
+    def replaceArrow(t: Tree) = {
+      t.tokens.collect {
+        case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
+      }.asPatch
     }
 
     @tailrec def recordTermHandled(t: Tree): Unit = {

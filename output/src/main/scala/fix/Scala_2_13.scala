@@ -14,6 +14,7 @@ object Scala_2_13 {
   def currentTimeMillis1 = System.currentTimeMillis
   def currentTimeMillis2 = System.currentTimeMillis
   def currentTimeMillis3 = System.currentTimeMillis
+  def currentTimeMillis4 = s"now: ${System.currentTimeMillis}"
 
   def arrayCopy1() = System.arraycopy(null, 0, null, 0, 0)
   def arrayCopy2() = System.arraycopy(null, 0, null, 0, 0)

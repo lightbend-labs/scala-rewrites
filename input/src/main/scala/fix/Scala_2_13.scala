@@ -17,6 +17,7 @@ object Scala_2_13 {
   def currentTimeMillis1 = currentTime
   def currentTimeMillis2 = Platform.currentTime
   def currentTimeMillis3 = scala.compat.Platform.currentTime
+  def currentTimeMillis4 = s"now: $currentTime"
 
   def arrayCopy1() = arraycopy(null, 0, null, 0, 0)
   def arrayCopy2() = Platform.arraycopy(null, 0, null, 0, 0)
