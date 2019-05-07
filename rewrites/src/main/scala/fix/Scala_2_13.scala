@@ -9,38 +9,6 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
     val EOL = SymbolMatcher.exact("scala/compat/Platform.EOL.")
     val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
     val arraycopy = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
-    val sysError = SymbolMatcher.exact("scala/sys/package.error().")
-    val sysExit = SymbolMatcher.exact("scala/sys/package.exit(+1).")
-    val sysExit0 = SymbolMatcher.exact("scala/sys/package.exit().")
-    val sysProps = SymbolMatcher.exact("scala/sys/package.props().")
-    val sysPropsGet = SymbolMatcher.exact("scala/sys/SystemProperties#get().")
-    val sysEnv = SymbolMatcher.exact("scala/sys/package.env().")
-    val mapLikeGet = SymbolMatcher.exact("scala/collection/MapLike#get().")
-    val sysRuntime = SymbolMatcher.exact("scala/sys/package.runtime().")
-    val sysAddShutdownHook = SymbolMatcher.exact("scala/sys/package.addShutdownHook().")
-    val console = SymbolMatcher.exact("scala/Console.")
-    val ansiColorBlack      = new TermSelectOrName(console, "scala/io/AnsiColor#BLACK.")
-    val ansiColorRed        = new TermSelectOrName(console, "scala/io/AnsiColor#RED.")
-    val ansiColorGreen      = new TermSelectOrName(console, "scala/io/AnsiColor#GREEN.")
-    val ansiColorYellow     = new TermSelectOrName(console, "scala/io/AnsiColor#YELLOW.")
-    val ansiColorBlue       = new TermSelectOrName(console, "scala/io/AnsiColor#BLUE.")
-    val ansiColorMagenta    = new TermSelectOrName(console, "scala/io/AnsiColor#MAGENTA.")
-    val ansiColorCyan       = new TermSelectOrName(console, "scala/io/AnsiColor#CYAN.")
-    val ansiColorWhite      = new TermSelectOrName(console, "scala/io/AnsiColor#WHITE.")
-    val ansiColorBlackB     = new TermSelectOrName(console, "scala/io/AnsiColor#BLACK_B.")
-    val ansiColorRedB       = new TermSelectOrName(console, "scala/io/AnsiColor#RED_B.")
-    val ansiColorGreenB     = new TermSelectOrName(console, "scala/io/AnsiColor#GREEN_B.")
-    val ansiColorYellowB    = new TermSelectOrName(console, "scala/io/AnsiColor#YELLOW_B.")
-    val ansiColorBlueB      = new TermSelectOrName(console, "scala/io/AnsiColor#BLUE_B.")
-    val ansiColorMagentaB   = new TermSelectOrName(console, "scala/io/AnsiColor#MAGENTA_B.")
-    val ansiColorCyanB      = new TermSelectOrName(console, "scala/io/AnsiColor#CYAN_B.")
-    val ansiColorWhiteB     = new TermSelectOrName(console, "scala/io/AnsiColor#WHITE_B.")
-    val ansiColorReset      = new TermSelectOrName(console, "scala/io/AnsiColor#RESET.")
-    val ansiColorBold       = new TermSelectOrName(console, "scala/io/AnsiColor#BOLD.")
-    val ansiColorUnderlined = new TermSelectOrName(console, "scala/io/AnsiColor#UNDERLINED.")
-    val ansiColorBlink      = new TermSelectOrName(console, "scala/io/AnsiColor#BLINK.")
-    val ansiColorReversed   = new TermSelectOrName(console, "scala/io/AnsiColor#REVERSED.")
-    val ansiColorInvisible  = new TermSelectOrName(console, "scala/io/AnsiColor#INVISIBLE.")
 
     val deprecatedConsoleReadBoolean = SymbolMatcher.exact("scala/DeprecatedConsole#readBoolean().")
     val deprecatedConsoleReadByte    = SymbolMatcher.exact("scala/DeprecatedConsole#readByte().")
@@ -89,78 +57,6 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         recordTermHandled(t)
         Patch.replaceTree(t, "System.arraycopy")
 
-      case sysError(i: Importee) => Patch.removeImportee(i)
-      case sysError(Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "throw new RuntimeException")
-
-      case sysExit(i: Importee) => Patch.removeImportee(i)
-      case sysExit(out @ Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "{ System.exit") + Patch.addRight(out, "; throw new Throwable }")
-      case sysExit0(t: Term.Apply) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "{ System.exit(0); throw new Throwable }")
-
-      case sysProps(i: Importee) => Patch.removeImportee(i)
-      case sysProps(Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.getProperty")
-      case sysProps(t: Term) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.getProperties.asScala") +
-          addGlobalImport(importer"scala.collection.JavaConverters._")
-      case sysPropsGet(out @ Term.Apply(t @ Term.Select(sysProps(in), _), _)) =>
-        recordTermHandled(in)
-        Patch.replaceTree(t, "Option(System.getProperty") + Patch.addRight(out, ")")
-
-      case sysEnv(i: Importee) => Patch.removeImportee(i)
-      case sysEnv(Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.getenv.asScala.apply") +
-          addGlobalImport(importer"scala.collection.JavaConverters._")
-      case sysEnv(t: Term) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "System.getenv.asScala.toMap") +
-          addGlobalImport(importer"scala.collection.JavaConverters._")
-      case mapLikeGet(out @ Term.Apply(t @ Term.Select(sysEnv(in), _), _)) =>
-        recordTermHandled(in)
-        Patch.replaceTree(t, "Option(System.getenv") + Patch.addRight(out, ")")
-
-      case sysRuntime(i: Importee) => Patch.removeImportee(i)
-      case sysRuntime(t: Term) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "Runtime.getRuntime")
-
-      case sysAddShutdownHook(i: Importee) => Patch.removeImportee(i)
-      case sysAddShutdownHook(out @ Term.Apply(t, _)) =>
-        recordTermHandled(t)
-        Patch.replaceTree(t, "Runtime.getRuntime.addShutdownHook(new Thread(() => ") +
-          Patch.addRight(out, "))")
-
-      case ansiColorBlack(t)      => colourReplace(interpolating, t, "BLACK")
-      case ansiColorRed(t)        => colourReplace(interpolating, t, "RED")
-      case ansiColorGreen(t)      => colourReplace(interpolating, t, "GREEN")
-      case ansiColorYellow(t)     => colourReplace(interpolating, t, "YELLOW")
-      case ansiColorBlue(t)       => colourReplace(interpolating, t, "BLUE")
-      case ansiColorMagenta(t)    => colourReplace(interpolating, t, "MAGENTA")
-      case ansiColorCyan(t)       => colourReplace(interpolating, t, "CYAN")
-      case ansiColorWhite(t)      => colourReplace(interpolating, t, "WHITE")
-      case ansiColorBlackB(t)     => colourReplace(interpolating, t, "BLACK_B")
-      case ansiColorRedB(t)       => colourReplace(interpolating, t, "RED_B")
-      case ansiColorGreenB(t)     => colourReplace(interpolating, t, "GREEN_B")
-      case ansiColorYellowB(t)    => colourReplace(interpolating, t, "YELLOW_B")
-      case ansiColorBlueB(t)      => colourReplace(interpolating, t, "BLUE_B")
-      case ansiColorMagentaB(t)   => colourReplace(interpolating, t, "MAGENTA_B")
-      case ansiColorCyanB(t)      => colourReplace(interpolating, t, "CYAN_B")
-      case ansiColorWhiteB(t)     => colourReplace(interpolating, t, "WHITE_B")
-      case ansiColorReset(t)      => colourReplace(interpolating, t, "RESET")
-      case ansiColorBold(t)       => colourReplace(interpolating, t, "BOLD")
-      case ansiColorUnderlined(t) => colourReplace(interpolating, t, "UNDERLINED")
-      case ansiColorBlink(t)      => colourReplace(interpolating, t, "BLINK")
-      case ansiColorReversed(t)   => colourReplace(interpolating, t, "REVERSED")
-      case ansiColorInvisible(t)  => colourReplace(interpolating, t, "INVISIBLE")
-
       case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
       case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
       case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
@@ -197,15 +93,6 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       }
     }
 
-    def colourReplace(interpolating: Boolean, tree: Tree, name: String) = {
-      recordTermHandled(tree)
-      val replacement = tree match {
-        case _: Term.Name if interpolating => s"{AnsiColor.$name}"
-        case _                             => s"AnsiColor.$name"
-      }
-      Patch.replaceTree(tree, replacement) + addGlobalImport(importer"scala.io.AnsiColor")
-    }
-
     def stdInReplace(tree: Tree, name: String) = {
       recordTermHandled(tree)
       Patch.replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
@@ -220,16 +107,6 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
     }
 
     doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixI(false))).asPatch
-  }
-}
-
-private class TermSelectOrName(qual: SymbolMatcher, name: String) {
-  val nameSymbolMatcher = SymbolMatcher.exact(name)
-
-  final def unapply(term: Term)(implicit sdoc: SemanticDocument): Option[Term] = term match {
-    case nameSymbolMatcher(t @ Term.Select(qual(_), _)) => Some(t)
-    case nameSymbolMatcher(t @ Term.Name(_))            => Some(t)
-    case _                                              => None
   }
 }
 
