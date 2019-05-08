@@ -23,6 +23,8 @@ object Scala_2_13 {
   val deprecatedConsoleReadf1      = SymbolMatcher.exact("scala/DeprecatedConsole#readf1().")
   val deprecatedConsoleReadf2      = SymbolMatcher.exact("scala/DeprecatedConsole#readf2().")
   val deprecatedConsoleReadf3      = SymbolMatcher.exact("scala/DeprecatedConsole#readf3().")
+
+  val arrowAssoc = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
 }
 
 final class Scala_2_13 extends SemanticRule("Scala_2_13") {
@@ -33,8 +35,10 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
     @tailrec def recordHandled(t: Tree): Unit = {
       handled += t
       t match {
-        case Term.Select(_, n) => recordHandled(n)
-        case _                 => ()
+        case Term.Apply(fun, _)           => recordHandled(fun)
+        case Term.ApplyInfix(_, op, _, _) => recordHandled(op)
+        case Term.Select(_, name)         => recordHandled(name)
+        case _                            => ()
       }
     }
 
@@ -44,6 +48,13 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         Patch.addGlobalImport(importer)
       else
         Patch.empty
+    }
+
+    def replaceToken(t: Tree, orig: String, repl: String) = {
+      recordHandled(t)
+      t.tokens.collect {
+        case t if t.text == orig => Patch.replaceToken(t, repl)
+      }.asPatch
     }
 
     def fixI(interpolating: Boolean): PartialFunction[Tree, Patch] = {
@@ -85,20 +96,15 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
         case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
 
-        case t: Case          => replaceArrow(t)
-        case t: Type.Function => replaceArrow(t)
-        case t: Importee      => replaceArrow(t)
+        case t: Case          => replaceToken(t, "⇒", "=>")
+        case t: Type.Function => replaceToken(t, "⇒", "=>")
+        case t: Importee      => replaceToken(t, "⇒", "=>")
+        case arrowAssoc(t)    => replaceToken(t, "→", "->")
 
         case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
       }
     }
     doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixI(false))).asPatch
-  }
-
-  private def replaceArrow(t: Tree) = {
-    t.tokens.collect {
-      case t: Token.RightArrow if t.text == "⇒" => Patch.replaceToken(t, "=>")
-    }.asPatch
   }
 }
 

@@ -49,6 +49,9 @@ object Scala_2_13 {
     }
   }
 
+  def singleArrow1: (Int, Int) = 1 -> 1
+  def singleArrow2: (Int, Int) = 1.->(1)
+
   def symbolLiteral0 = Symbol("foo")
   def symbolLiteral1 = Symbol("foo")
 }
