@@ -48,6 +48,7 @@ object Scala_2_13 {
       case 1 => "one"
     }
   }
+  def arrow4 = Some(1).map(x => x.toString)
 
   def singleArrow1: (Int, Int) = 1 -> 1
   def singleArrow2: (Int, Int) = 1.->(1)

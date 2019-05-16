@@ -98,6 +98,7 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
 
         case t: Case          => replaceToken(t, "⇒", "=>")
         case t: Type.Function => replaceToken(t, "⇒", "=>")
+        case t: Term.Function => replaceToken(t, "⇒", "=>")
         case t: Importee      => replaceToken(t, "⇒", "=>")
         case arrowAssoc(t)    => replaceToken(t, "→", "->")
 
