@@ -57,52 +57,51 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       }.asPatch
     }
 
+    def replaceTree(t: Tree, s: String) = {
+      recordHandled(t)
+      val replacement = t match {
+        case _: Term.Name if t.parent.exists(_.isInstanceOf[Term.Interpolate]) && s.contains(".")
+               => s"{$s}"
+        case _ => s
+      }
+      Patch.replaceTree(t, replacement)
+    }
+    def stdInReplace(tree: Tree, name: String) = {
+      replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
+    }
+
     val fixTree: PartialFunction[Tree, Patch] = {
-      def replaceTree(t: Tree, s: String) = {
-        recordHandled(t)
-        val replacement = t match {
-          case _: Term.Name if t.parent.exists(_.isInstanceOf[Term.Interpolate]) && s.contains(".")
-                 => s"{$s}"
-          case _ => s
-        }
-        Patch.replaceTree(t, replacement)
-      }
-      def stdInReplace(tree: Tree, name: String) = {
-        replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
-      }
-      {
-        case EOL(i: Importee) => Patch.removeImportee(i)
-        case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
+      case EOL(i: Importee) => Patch.removeImportee(i)
+      case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
 
-        case currentTime(i: Importee) => Patch.removeImportee(i)
-        case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
+      case currentTime(i: Importee) => Patch.removeImportee(i)
+      case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
 
-        case arraycopy(i: Importee)      => Patch.removeImportee(i)
-        case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
+      case arraycopy(i: Importee)      => Patch.removeImportee(i)
+      case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
 
-        case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
-        case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
-        case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
-        case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
-        case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
-        case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
-        case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
-        case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
-        case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
-        case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
-        case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
-        case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
-        case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
-        case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
+      case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
+      case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
+      case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
+      case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
+      case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
+      case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
+      case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
+      case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
+      case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
+      case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
+      case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
+      case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
 
-        case t: Case          => replaceToken(t, "⇒", "=>")
-        case t: Type.Function => replaceToken(t, "⇒", "=>")
-        case t: Term.Function => replaceToken(t, "⇒", "=>")
-        case t: Importee      => replaceToken(t, "⇒", "=>")
-        case arrowAssoc(t)    => replaceToken(t, "→", "->")
+      case t: Case          => replaceToken(t, "⇒", "=>")
+      case t: Type.Function => replaceToken(t, "⇒", "=>")
+      case t: Term.Function => replaceToken(t, "⇒", "=>")
+      case t: Importee      => replaceToken(t, "⇒", "=>")
+      case arrowAssoc(t)    => replaceToken(t, "→", "->")
 
-        case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
-      }
+      case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
     }
     doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixTree)).asPatch
   }
