@@ -112,20 +112,6 @@ private object Combined {
   private def isFallback[B](x: B): Boolean = fallback eq x.asInstanceOf[AnyRef]
   private def applyOrFallback[A, B](pf: PartialFunction[A, B], x: A): B =
     pf.applyOrElse(x, fallback.asInstanceOf[Any => B])
-
-  def constStrict[A, B](x: B): A => B    = (_ => x)
-  def constAlways[A, B](x: => B): A => B = (_ => x)
-  def constByName[A, B](x: => B): A => B = new ConstByName[A, B](x _)
-
-  final class ConstByName[A, B](private[this] var thunk: () => B) extends (A => B) {
-    lazy val b: B = {
-      val result = thunk()
-      thunk = null // free memory
-      result
-    }
-
-    def apply(x: A): B = b
-  }
 }
 
 private final class Combined[-A, B, +C] (pf: PartialFunction[A, B], k: PartialFunction[B, C]) extends PartialFunction[A, C] {
@@ -141,6 +127,6 @@ private final class Combined[-A, B, +C] (pf: PartialFunction[A, B], k: PartialFu
   override def applyOrElse[A1 <: A, C1 >: C](x: A1, default: A1 => C1): C1 = {
     val b: B = applyOrFallback(pf, x)
     if (isFallback(b)) default(x)
-    else k.applyOrElse(b, constByName(default(x)))
+    else k.applyOrElse(b, (_: B) => default(x))
   }
 }
