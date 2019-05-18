@@ -57,12 +57,13 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       }.asPatch
     }
 
-    def fixI(interpolating: Boolean): PartialFunction[Tree, Patch] = {
+    val fixTree: PartialFunction[Tree, Patch] = {
       def replaceTree(t: Tree, s: String) = {
         recordHandled(t)
         val replacement = t match {
-          case _: Term.Name if interpolating => s"{$s}"
-          case _                             => s
+          case _: Term.Name if t.parent.exists(_.isInstanceOf[Term.Interpolate]) && s.contains(".")
+                 => s"{$s}"
+          case _ => s
         }
         Patch.replaceTree(t, replacement)
       }
@@ -70,8 +71,6 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
       }
       {
-        case Term.Interpolate(_, _, args) => args.collect(fixI(true)).asPatch
-
         case EOL(i: Importee) => Patch.removeImportee(i)
         case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
 
@@ -105,7 +104,7 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
         case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
       }
     }
-    doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixI(false))).asPatch
+    doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixTree)).asPatch
   }
 }
 
