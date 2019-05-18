@@ -103,30 +103,35 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
 
       case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
     }
-    doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixTree)).asPatch
+
+    val unhandledTrees: PartialFunction[Tree, Tree] = { case t if !handled(t) => t }
+    doc.tree.collect(PF.andThen(unhandledTrees, fixTree)).asPatch
   }
 }
 
-private object Combined {
+private object PF {
   private[this] val fallback: Any => Any = _ => fallback
   private def isFallback[B](x: B): Boolean = fallback eq x.asInstanceOf[AnyRef]
   private def applyOrFallback[A, B](pf: PartialFunction[A, B], x: A): B =
     pf.applyOrElse(x, fallback.asInstanceOf[Any => B])
-}
 
-private final class Combined[-A, B, +C] (pf: PartialFunction[A, B], k: PartialFunction[B, C]) extends PartialFunction[A, C] {
-  import Combined._
+  def andThen[A, B, C](f: PartialFunction[A, B], g: PartialFunction[B, C]): PartialFunction[A, C] =
+    new Combined[A, B, C](f, g)
 
-  def isDefinedAt(x: A): Boolean = {
-    val b: B = applyOrFallback(pf, x)
-    !isFallback(b) || k.isDefinedAt(b)
-  }
+  private final class Combined[-A, B, +C] (f: PartialFunction[A, B], g: PartialFunction[B, C])
+      extends PartialFunction[A, C]
+  {
+    def isDefinedAt(x: A): Boolean = {
+      val b: B = applyOrFallback(f, x)
+      !isFallback(b) || g.isDefinedAt(b)
+    }
 
-  def apply(x: A): C = k(pf(x))
+    def apply(x: A): C = g(f(x))
 
-  override def applyOrElse[A1 <: A, C1 >: C](x: A1, default: A1 => C1): C1 = {
-    val b: B = applyOrFallback(pf, x)
-    if (isFallback(b)) default(x)
-    else k.applyOrElse(b, (_: B) => default(x))
+    override def applyOrElse[A1 <: A, C1 >: C](x: A1, default: A1 => C1): C1 = {
+      val b: B = applyOrFallback(f, x)
+      if (isFallback(b)) default(x)
+      else g.applyOrElse(b, (_: B) => default(x))
+    }
   }
 }
