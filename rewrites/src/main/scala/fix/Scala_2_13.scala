@@ -57,76 +57,81 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       }.asPatch
     }
 
-    def fixI(interpolating: Boolean): PartialFunction[Tree, Patch] = {
-      def replaceTree(t: Tree, s: String) = {
-        recordHandled(t)
-        val replacement = t match {
-          case _: Term.Name if interpolating => s"{$s}"
-          case _                             => s
-        }
-        Patch.replaceTree(t, replacement)
+    def replaceTree(t: Tree, s: String) = {
+      recordHandled(t)
+      val replacement = t match {
+        case _: Term.Name if t.parent.exists(_.isInstanceOf[Term.Interpolate]) && s.contains(".")
+               => s"{$s}"
+        case _ => s
       }
-      def stdInReplace(tree: Tree, name: String) = {
-        replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
-      }
-      {
-        case Term.Interpolate(_, _, args) => args.collect(fixI(true)).asPatch
-
-        case EOL(i: Importee) => Patch.removeImportee(i)
-        case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
-
-        case currentTime(i: Importee) => Patch.removeImportee(i)
-        case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
-
-        case arraycopy(i: Importee)      => Patch.removeImportee(i)
-        case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
-
-        case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
-        case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
-        case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
-        case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
-        case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
-        case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
-        case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
-        case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
-        case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
-        case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
-        case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
-        case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
-        case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
-        case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
-
-        case t: Case          => replaceToken(t, "⇒", "=>")
-        case t: Type.Function => replaceToken(t, "⇒", "=>")
-        case t: Term.Function => replaceToken(t, "⇒", "=>")
-        case t: Importee      => replaceToken(t, "⇒", "=>")
-        case arrowAssoc(t)    => replaceToken(t, "→", "->")
-
-        case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
-      }
+      Patch.replaceTree(t, replacement)
     }
-    doc.tree.collect(new Combined({ case t if !handled(t) => t }, fixI(false))).asPatch
+    def stdInReplace(tree: Tree, name: String) = {
+      replaceTree(tree, s"StdIn.$name") + addGlobalImport(importer"scala.io.StdIn")
+    }
+
+    val fixTree: PartialFunction[Tree, Patch] = {
+      case EOL(i: Importee) => Patch.removeImportee(i)
+      case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
+
+      case currentTime(i: Importee) => Patch.removeImportee(i)
+      case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
+
+      case arraycopy(i: Importee)      => Patch.removeImportee(i)
+      case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
+
+      case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
+      case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
+      case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
+      case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
+      case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
+      case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
+      case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
+      case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
+      case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
+      case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
+      case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
+      case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
+
+      case t: Case          => replaceToken(t, "⇒", "=>")
+      case t: Type.Function => replaceToken(t, "⇒", "=>")
+      case t: Term.Function => replaceToken(t, "⇒", "=>")
+      case t: Importee      => replaceToken(t, "⇒", "=>")
+      case arrowAssoc(t)    => replaceToken(t, "→", "->")
+
+      case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
+    }
+
+    val unhandledTrees: PartialFunction[Tree, Tree] = { case t if !handled(t) => t }
+    doc.tree.collect(PF.andThen(unhandledTrees, fixTree)).asPatch
   }
 }
 
-private object Combined {
-  private[this] val mockDefaultFunc: Any => Any = _ => mockDefaultFunc
-  private def mockDefaultFunction[B] = mockDefaultFunc.asInstanceOf[Any => B]
-  private def fallbackOccurred[B](x: B) = mockDefaultFunc eq x.asInstanceOf[AnyRef]
-}
+private object PF {
+  private[this] val fallback: Any => Any = _ => fallback
+  private def isFallback[B](x: B): Boolean = fallback eq x.asInstanceOf[AnyRef]
+  private def applyOrFallback[A, B](pf: PartialFunction[A, B], x: A): B =
+    pf.applyOrElse(x, fallback.asInstanceOf[Any => B])
 
-private final class Combined[-A, B, +C] (pf: PartialFunction[A, B], k: PartialFunction[B, C]) extends PartialFunction[A, C] {
-  import Combined._
+  def andThen[A, B, C](f: PartialFunction[A, B], g: PartialFunction[B, C]): PartialFunction[A, C] =
+    new Combined[A, B, C](f, g)
 
-  def isDefinedAt(x: A): Boolean = {
-    val b = pf.applyOrElse(x, mockDefaultFunction)
-    !fallbackOccurred(b) || k.isDefinedAt(b)
-  }
+  private final class Combined[-A, B, +C] (f: PartialFunction[A, B], g: PartialFunction[B, C])
+      extends PartialFunction[A, C]
+  {
+    def isDefinedAt(x: A): Boolean = {
+      val b: B = applyOrFallback(f, x)
+      !isFallback(b) || g.isDefinedAt(b)
+    }
 
-  def apply(x: A): C = k(pf(x))
+    def apply(x: A): C = g(f(x))
 
-  override def applyOrElse[A1 <: A, C1 >: C](x: A1, default: A1 => C1): C1 = {
-    val pfv = pf.applyOrElse(x, mockDefaultFunction)
-    if (fallbackOccurred(pfv)) default(x) else k.applyOrElse(pfv, (_: B) => default(x))
+    override def applyOrElse[A1 <: A, C1 >: C](x: A1, default: A1 => C1): C1 = {
+      val b: B = applyOrFallback(f, x)
+      if (isFallback(b)) default(x)
+      else g.applyOrElse(b, (_: B) => default(x))
+    }
   }
 }
