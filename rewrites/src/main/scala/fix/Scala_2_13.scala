@@ -1,5 +1,6 @@
 package fix
 
+import impl.Substitutions._
 import scalafix.v1._
 import scala.annotation.tailrec
 import scala.meta._
@@ -23,11 +24,9 @@ object Scala_2_13 {
   val deprecatedConsoleReadf1      = SymbolMatcher.exact("scala/DeprecatedConsole#readf1().")
   val deprecatedConsoleReadf2      = SymbolMatcher.exact("scala/DeprecatedConsole#readf2().")
   val deprecatedConsoleReadf3      = SymbolMatcher.exact("scala/DeprecatedConsole#readf3().")
-
-  val arrowAssoc = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
 }
 
-final class Scala_2_13 extends SemanticRule("Scala_2_13") {
+final class Scala_2_13 extends SemanticRule("fix.Scala_2_13") {
   import Scala_2_13._
 
   override def fix(implicit doc: SemanticDocument): Patch = {
@@ -94,18 +93,15 @@ final class Scala_2_13 extends SemanticRule("Scala_2_13") {
       case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
       case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
       case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
-
-      case t: Case          => replaceToken(t, "⇒", "=>")
-      case t: Type.Function => replaceToken(t, "⇒", "=>")
-      case t: Term.Function => replaceToken(t, "⇒", "=>")
-      case t: Importee      => replaceToken(t, "⇒", "=>")
-      case arrowAssoc(t)    => replaceToken(t, "→", "->")
-
-      case t @ Lit.Symbol(sym) => Patch.replaceTree(t, s"""Symbol("${sym.name}")""")
     }
 
     val unhandledTrees: PartialFunction[Tree, Tree] = { case t if !handled(t) => t }
-    doc.tree.collect(PF.andThen(unhandledTrees, fixTree)).asPatch
+    val oldStyle = doc.tree.collect(PF.andThen(unhandledTrees, fixTree)).asPatch
+
+    val substitutions: PartialFunction[Tree, Patch] = rewritePF(List(
+      unicodeArrows, symbolLiteral))
+
+    doc.tree.collect(substitutions).asPatch + oldStyle
   }
 }
 

@@ -35,11 +35,12 @@ object Scala_2_13 {
   def consoleReadf2(format: String)             = StdIn.readf2(format)
   def consoleReadf3(format: String)             = StdIn.readf3(format)
 
-  def arrow1: PartialFunction[Int, String] = {
-    case 0          => "zero"
-    case 1           => "one"
-    case 2 =>           "two"
-    case n if n > 10 => "ginormous"
+  def arrow1: PartialFunction[Any, String] = {
+    case 0      => "zero"
+    case 1       => "one"
+    case 2 =>       "two"
+    case n: Int  => "ginormous"
+    case "⇒"    => "?"
   }
   def arrow2(f: Int => String) = f(1)
   def arrow3 = {
