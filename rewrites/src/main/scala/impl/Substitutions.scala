@@ -20,7 +20,7 @@ object Substitutions {
 
   // Symbols
 
-  val arrowAssoc: SymbolMatcher = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
+  private val arrowAssoc: SymbolMatcher = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
 
   // Rewrites
 

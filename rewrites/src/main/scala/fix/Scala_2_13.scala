@@ -2,6 +2,7 @@ package fix
 
 import impl.Substitutions._
 import scalafix.v1._
+
 import scala.annotation.tailrec
 import scala.meta._
 
