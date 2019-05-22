@@ -1,5 +1,5 @@
 fix.Scala_2_13
-fix.Scala_2_13_Seq
+fix.scala213.ScalaSeq
 fix.Varargs
 
 lint.Scala_2_13

@@ -1,5 +1,5 @@
-package fix
+package fix.scala213
 
-class Scala_2_13_Seq {
+class ScalaSeq {
   def f(a: scala.collection.Seq[Int], b: List[scala.collection.Seq[Int]]): scala.collection.immutable.Seq[Any] = List(a, b)
 }

@@ -1,5 +1,6 @@
 package impl
 
+import fix.scala213.ScalaSeqConfig
 import scalafix.v1._
 
 import scala.collection.mutable.ListBuffer
@@ -23,7 +24,7 @@ object Traversals {
     def lint(tree: Tree): Patch = run(tree).map(_.lint).asPatch
   }
 
-  class SeqTraverser(doc: SemanticDocument) extends CollectingTraverser(doc) {
+  class SeqTraverser(doc: SemanticDocument, config: ScalaSeqConfig) extends CollectingTraverser(doc) {
     private val scalaSeq = SymbolMatcher.exact("scala/package.Seq#")
 
     private var inParam = false
@@ -37,7 +38,7 @@ object Traversals {
 
       case scalaSeq(Type.Apply(t, _)) =>
         val diag = Diagnostic("scalaSeq", "scala.Seq is an alias for immutable.Seq in 2.13, no longer collection.Seq", t.pos)
-        val sub = if (inParam) "scala.collection.Seq" else "scala.collection.immutable.Seq"
+        val sub = if (inParam) config.paramType else config.otherType
         result += RewriteAndDiagnostic(Patch.replaceTree(t, sub), diag)
 
       case _ => super.apply(tree)
