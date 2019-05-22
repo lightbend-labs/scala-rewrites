@@ -9,7 +9,7 @@ sbt ~tests/test
 
 ## To run the rule
 
-0. Publish the rule `publishLocal`
+0. Publish the rule: `publishLocal`
 1. Add sbt-scalafix: `addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.4")`
 2. Add SemanticDB: `addCompilerPlugin(scalafixSemanticdb)`
 3. Configure Semantic DB: `scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")`
