@@ -1,5 +1,7 @@
 package fix.scala213
 
+import scala.{collection => sc}
+import scala.collection.{immutable => sci}
 class ScalaSeq {
-  def f(a: scala.collection.Seq[Int], b: List[scala.collection.Seq[Int]]): scala.collection.immutable.Seq[Any] = List(a, b)
+  def f(a: sc.Seq[Int], b: List[sc.Seq[Int]]): sci.Seq[Any] = List(a, b)
 }

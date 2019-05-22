@@ -1,10 +1,10 @@
 /*
 rule = fix.scala213.ScalaSeq
 fix.scala213.ScalaSeq = {
-  paramType = "scala.collection.Seq",
-  paramImport = "",
-  otherType = "scala.collection.immutable.Seq",
-  otherImport = ""
+  paramType = "sc.Seq",
+  paramImport = "scala.{collection => sc}",
+  otherType = "sci.Seq",
+  otherImport = "scala.collection.{immutable => sci}"
 }
 */
 package fix.scala213

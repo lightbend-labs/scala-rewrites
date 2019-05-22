@@ -1,7 +1,8 @@
 package fix.scala213
 
 import impl.Traversals.SeqTraverser
-import metaconfig.Configured
+import metaconfig.generic.Surface
+import metaconfig.{ConfDecoder, Configured}
 import scalafix.v1._
 
 final class ScalaSeq(val config: ScalaSeqConfig) extends SemanticRule("fix.scala213.ScalaSeq") {
@@ -18,4 +19,15 @@ final class ScalaSeq(val config: ScalaSeqConfig) extends SemanticRule("fix.scala
 
   override def fix(implicit doc: SemanticDocument): Patch =
     new SeqTraverser(doc, config).rewrite(doc.tree)
+}
+
+case class ScalaSeqConfig(
+    paramType: String = "collection.Seq",
+    paramImport: String = "scala.collection",
+    otherType: String = "immutable.Seq",
+    otherImport: String = "scala.collection.immutable")
+
+object ScalaSeqConfig {
+  implicit val surface: Surface[ScalaSeqConfig] = metaconfig.generic.deriveSurface[ScalaSeqConfig]
+  implicit val decoder: ConfDecoder[ScalaSeqConfig] = metaconfig.generic.deriveDecoder(new ScalaSeqConfig())
 }
