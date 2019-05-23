@@ -1,9 +1,9 @@
-package lint
+package lint.scala213
 
 import impl.Substitutions
 import scalafix.v1._
 
-final class Scala_2_13 extends SemanticRule("lint.Scala_2_13") {
+final class Core extends SemanticRule("lint.scala213.Core") {
   override def fix(implicit doc: SemanticDocument): Patch = {
     val subs = new Substitutions
     val toRun = {
