@@ -3,7 +3,18 @@ rule = lint.Scala_2_13
 */
 package lint
 
+import scala.compat.Platform
+import scala.compat.Platform.EOL // assert: lint.Scala_2_13.EOL
+
 class Scala_2_13 {
+  def eol1 = "Hello World!" + EOL // assert: lint.Scala_2_13.EOL
+  def eol2 = s"Hello World!$EOL" // assert: lint.Scala_2_13.EOL
+  def elo2b = s"Hello World!${EOL}" // assert: lint.Scala_2_13.EOL
+  def eol3 = "Hello World!" + Platform.EOL // assert: lint.Scala_2_13.EOL
+  def eol4 = s"Hello World!${Platform.EOL}" // assert: lint.Scala_2_13.EOL
+  def eol5 = "Hello World!" + scala.compat.Platform.EOL // assert: lint.Scala_2_13.EOL
+  def eol6 = s"Hello World!${scala.compat.Platform.EOL}" // assert: lint.Scala_2_13.EOL
+
   def arrow1: PartialFunction[Any, String] = {
     case 0      => "zero"
     case 1       ⇒ "one" // assert: lint.Scala_2_13.unicodeDoubleArrow

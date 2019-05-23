@@ -2,49 +2,89 @@ package impl
 
 import scalafix.v1._
 
+import scala.collection.mutable
 import scala.meta._
+import scala.meta.parsers.Parsed.Success
 
-object Substitutions {
-  type Substitution = PartialFunction[Tree, List[RewriteAndDiagnostic]]
+class Substitutions(implicit doc: SemanticDocument) {
+  type Substitution = PartialFunction[Tree, RewriteAndDiagnostic]
 
-  private def substitutionsPF(subs: List[Substitution]): PartialFunction[Tree, List[RewriteAndDiagnostic]] = {
-    case t if subs.exists(_.isDefinedAt(t)) =>
-      subs.flatMap(_.applyOrElse(t, (_: Tree) => Nil))
+  /** Trees will be replaced by one of the patches. Their children are not visited by the [[SubstitutingTraverser]] */
+  private val substituted = mutable.Set.empty[Tree]
+
+  private class SubstitutingTraverser(sub: PartialFunction[Tree, Patch]) extends Traverser {
+    val patches = mutable.ListBuffer.empty[Patch]
+    override def apply(tree: Tree): Unit = {
+      if (sub.isDefinedAt(tree)) patches += sub(tree)
+      if (!substituted(tree)) super.apply(tree)
+    }
   }
 
-  def rewritePF(subs: List[Substitution]): PartialFunction[Tree, Patch] =
-    substitutionsPF(subs).andThen(_.map(_.rewrite).asPatch)
+  private def substitutionsPF(subs: List[Substitution], toPatch: RewriteAndDiagnostic => Patch): PartialFunction[Tree, Patch] = {
+    case t if subs.exists(_.isDefinedAt(t)) =>
+      subs.flatMap(_.lift.apply(t).map(toPatch)).asPatch
+  }
 
-  def lintPF(subs: List[Substitution]): PartialFunction[Tree, Patch] =
-    substitutionsPF(subs).andThen(_.map(_.lint).asPatch)
+  private def run(tree: Tree, subs: List[Substitution], toPatch: RewriteAndDiagnostic => Patch): Patch = {
+    val traverser = new SubstitutingTraverser(substitutionsPF(subs, toPatch))
+    traverser.apply(tree)
+    traverser.patches.asPatch
+  }
+
+  def rewrite(tree: Tree, subs: List[Substitution]): Patch = run(tree, subs, _.rewrite)
+  def lint(tree: Tree, subs: List[Substitution]): Patch = run(tree, subs, _.lint)
 
   // Symbols
 
-  private val arrowAssoc: SymbolMatcher = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
+  private val EOL        = SymbolMatcher.exact("scala/compat/Platform.EOL.")
+  private val arrowAssoc = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
 
   // Rewrites
 
-  private def replaceToken(t: Tree, orig: String, repl: String, id: String, message: String): List[RewriteAndDiagnostic] = {
-    t.tokens.collect {
-      case tok if tok.text == orig => RewriteAndDiagnostic(
-        Patch.replaceToken(tok, repl),
-        Diagnostic(id, message, tok.pos))
-    }.toList
+  private def replaceTokens(t: Tree, orig: String, repl: String, message: Position => Diagnostic): RewriteAndDiagnostic = {
+    var first: Token = null
+    val patches = t.tokens.collect {
+      case tok if tok.text == orig =>
+        if (first == null) first = tok
+        Patch.replaceToken(tok, repl)
+    }
+    if (first == null) RewriteAndDiagnostic.empty
+    else RewriteAndDiagnostic(
+      patches.asPatch,
+      message(first.pos))
   }
 
-  private def replaceTree(from: Tree, to: String, id: String, message: String): List[RewriteAndDiagnostic] = {
-    List(RewriteAndDiagnostic(Patch.replaceTree(from, to), Diagnostic(id, message, from.pos)))
+  private def replaceTree(from: Tree, to: String, message: Position => Diagnostic): RewriteAndDiagnostic = {
+    def toIsName = to.parse[Term] match {
+      case Success(_: Term.Name) => true
+      case _ => false
+    }
+    val toQ = from match {
+      case _: Term.Name if from.parent.exists(_.isInstanceOf[Term.Interpolate]) && !toIsName =>
+        s"{$to}"
+      case _ =>
+        to
+    }
+    substituted += from
+    RewriteAndDiagnostic(Patch.replaceTree(from, toQ), message(from.pos))
   }
 
-  def unicodeArrows(implicit doc: SemanticDocument): Substitution = {
-    case t: Case                  => replaceToken(t, "⇒", "=>", "unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13")
-    case t: Type.Function         => replaceToken(t, "⇒", "=>", "unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13")
-    case t: Term.Function         => replaceToken(t, "⇒", "=>", "unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13")
-    case t: Importee              => replaceToken(t, "⇒", "=>", "unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13")
-    case arrowAssoc(t: Term.Name) => replaceToken(t, "→", "->", "unicodeArrow", "Unicode arrows are deprecated in Scala 2.13")
+  private val platformEOLDiag = Diagnostic("EOL", "scala.compat.Platform is deprecated in Scala 2.13", _: Position)
+  val platfromEOL: Substitution = {
+    case EOL(i: Importee) => RewriteAndDiagnostic(Patch.removeImportee(i), platformEOLDiag(i.pos))
+    case EOL(t: Term)     => replaceTree(t, "System.lineSeparator", platformEOLDiag)
   }
 
-  def symbolLiteral(implicit doc: SemanticDocument): Substitution = {
-    case t @ Lit.Symbol(sym) => replaceTree(t, s"""Symbol("${sym.name}")""", "symbolLiteral", "Symbol literals are deprecated in Scala 2.13")
+  private val unicodeDoubleArrowDiag = Diagnostic("unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13", _: Position)
+  val unicodeArrows: Substitution = {
+    case t: Case                  => replaceTokens(t, "⇒", "=>", unicodeDoubleArrowDiag)
+    case t: Type.Function         => replaceTokens(t, "⇒", "=>", unicodeDoubleArrowDiag)
+    case t: Term.Function         => replaceTokens(t, "⇒", "=>", unicodeDoubleArrowDiag)
+    case t: Importee              => replaceTokens(t, "⇒", "=>", unicodeDoubleArrowDiag)
+    case arrowAssoc(t: Term.Name) => replaceTree(t, "->", Diagnostic("unicodeArrow", "Unicode arrows are deprecated in Scala 2.13", _))
+  }
+
+  val symbolLiteral: Substitution = {
+    case t @ Lit.Symbol(sym) => replaceTree(t, s"""Symbol("${sym.name}")""", Diagnostic("symbolLiteral", "Symbol literals are deprecated in Scala 2.13", _))
   }
 }

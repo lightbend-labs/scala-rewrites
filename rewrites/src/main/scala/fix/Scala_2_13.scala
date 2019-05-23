@@ -1,13 +1,12 @@
 package fix
 
-import impl.Substitutions._
+import impl.Substitutions
 import scalafix.v1._
 
 import scala.annotation.tailrec
 import scala.meta._
 
 object Scala_2_13 {
-  val EOL         = SymbolMatcher.exact("scala/compat/Platform.EOL.")
   val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
   val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
 
@@ -71,9 +70,6 @@ final class Scala_2_13 extends SemanticRule("fix.Scala_2_13") {
     }
 
     val fixTree: PartialFunction[Tree, Patch] = {
-      case EOL(i: Importee) => Patch.removeImportee(i)
-      case EOL(t: Term)     => replaceTree(t, "System.lineSeparator")
-
       case currentTime(i: Importee) => Patch.removeImportee(i)
       case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
 
@@ -99,10 +95,12 @@ final class Scala_2_13 extends SemanticRule("fix.Scala_2_13") {
     val unhandledTrees: PartialFunction[Tree, Tree] = { case t if !handled(t) => t }
     val oldStyle = doc.tree.collect(PF.andThen(unhandledTrees, fixTree)).asPatch
 
-    val substitutions: PartialFunction[Tree, Patch] = rewritePF(List(
-      unicodeArrows, symbolLiteral))
-
-    doc.tree.collect(substitutions).asPatch + oldStyle
+    val subs = new Substitutions
+    val toRun = {
+      import subs._
+      List(platfromEOL, unicodeArrows, symbolLiteral)
+    }
+    subs.rewrite(doc.tree, toRun) + oldStyle
   }
 }
 

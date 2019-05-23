@@ -9,7 +9,7 @@ import scala.meta._
 
 
 object Traversals {
-  abstract class CollectingTraverser(doc: SemanticDocument) extends Traverser{
+  abstract class CollectingTraverser(doc: SemanticDocument) extends Traverser {
     protected implicit val theDoc: SemanticDocument = doc
 
     protected val result = ListBuffer.empty[RewriteAndDiagnostic]

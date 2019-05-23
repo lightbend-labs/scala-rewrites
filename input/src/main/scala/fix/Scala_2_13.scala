@@ -9,6 +9,7 @@ import scala.compat.Platform.{ EOL, arraycopy, currentTime }
 object Scala_2_13 {
   def eol1 = "Hello World!" + EOL
   def eol2 = s"Hello World!$EOL"
+  def elo2b = s"Hello World!${EOL}"
   def eol3 = "Hello World!" + Platform.EOL
   def eol4 = s"Hello World!${Platform.EOL}"
   def eol5 = "Hello World!" + scala.compat.Platform.EOL

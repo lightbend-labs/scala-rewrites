@@ -6,6 +6,7 @@ import scala.io.StdIn
 object Scala_2_13 {
   def eol1 = "Hello World!" + System.lineSeparator
   def eol2 = s"Hello World!${System.lineSeparator}"
+  def elo2b = s"Hello World!${{System.lineSeparator}}"
   def eol3 = "Hello World!" + System.lineSeparator
   def eol4 = s"Hello World!${System.lineSeparator}"
   def eol5 = "Hello World!" + System.lineSeparator

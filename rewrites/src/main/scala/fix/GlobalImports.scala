@@ -1,8 +1,9 @@
 package fix
 
+import scalafix.v1._
+
 import scala.collection.mutable
 import scala.meta._
-import scalafix.v1._
 
 class GlobalImports {
   private val known = mutable.Set.empty[String]
