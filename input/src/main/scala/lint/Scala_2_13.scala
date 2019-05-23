@@ -24,6 +24,21 @@ object Scala_2_13 {
   def arrayCopy2() = Platform.arraycopy(null, 0, null, 0, 0) // assert: lint.Scala_2_13.platform
   def arrayCopy3() = scala.compat.Platform.arraycopy(null, 0, null, 0, 0) // assert: lint.Scala_2_13.platform
 
+  def consoleReadBoolean                        = Console.readBoolean() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadByte                           = Console.readByte() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadChar                           = Console.readChar() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadDouble                         = Console.readDouble() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadFloat                          = Console.readFloat() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadInt                            = Console.readInt() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadLine                           = Console.readLine() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadLine(text: String, args: Any*) = Console.readLine(text, args: _*) // assert: lint.Scala_2_13.consoleRead
+  def consoleReadLong                           = Console.readLong() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadShort                          = Console.readShort() // assert: lint.Scala_2_13.consoleRead
+  def consoleReadf(format: String)              = Console.readf(format) // assert: lint.Scala_2_13.consoleRead
+  def consoleReadf1(format: String)             = Console.readf1(format) // assert: lint.Scala_2_13.consoleRead
+  def consoleReadf2(format: String)             = Console.readf2(format) // assert: lint.Scala_2_13.consoleRead
+  def consoleReadf3(format: String)             = Console.readf3(format) // assert: lint.Scala_2_13.consoleRead
+
   def arrow1: PartialFunction[Any, String] = {
     case 0      => "zero"
     case 1       ⇒ "one" // assert: lint.Scala_2_13.unicodeDoubleArrow

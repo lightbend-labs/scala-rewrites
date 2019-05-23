@@ -31,10 +31,10 @@ class Substitutions(implicit doc: SemanticDocument) {
   private def run(tree: Tree, subs: List[Substitution], toPatch: RewriteAndDiagnostic => Patch): Patch = {
     val traverser = new SubstitutingTraverser(substitutionsPF(subs, toPatch))
     traverser.apply(tree)
-    traverser.patches.asPatch + globalImports.patch
+    traverser.patches.asPatch
   }
 
-  def rewrite(tree: Tree, subs: List[Substitution]): Patch = run(tree, subs, _.rewrite)
+  def rewrite(tree: Tree, subs: List[Substitution]): Patch = run(tree, subs, _.rewrite) + globalImports.patch
   def lint(tree: Tree, subs: List[Substitution]): Patch = run(tree, subs, _.lint)
 
   // Symbols
