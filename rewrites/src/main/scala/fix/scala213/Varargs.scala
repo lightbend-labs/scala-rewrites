@@ -1,4 +1,4 @@
-package fix
+package fix.scala213
 
 import scalafix.v1._
 
@@ -8,7 +8,7 @@ object Varargs {
   val scSeq = new SignatureMatcher(SymbolMatcher.exact("scala/collection/Seq#"))
 }
 
-final class Varargs extends SemanticRule("Varargs") {
+final class Varargs extends SemanticRule("fix.scala213.Varargs") {
   import Varargs._
 
   override def fix(implicit doc: SemanticDocument): Patch = {
