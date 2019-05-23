@@ -1,6 +1,5 @@
 package impl
 
-import fix.GlobalImports
 import scalafix.v1._
 
 import scala.collection.mutable

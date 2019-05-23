@@ -1,4 +1,4 @@
-package fix
+package impl
 
 import scalafix.v1._
 

@@ -1,6 +1,5 @@
 package impl
 
-import fix.GlobalImports
 import fix.scala213.ScalaSeqConfig
 import scalafix.v1._
 
