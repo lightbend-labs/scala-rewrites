@@ -4,16 +4,16 @@ rule = lint.Scala_2_13
 package lint
 
 import scala.compat.Platform
-import scala.compat.Platform.EOL // assert: lint.Scala_2_13.EOL
+import scala.compat.Platform.EOL // assert: lint.Scala_2_13.platform
 
 class Scala_2_13 {
-  def eol1 = "Hello World!" + EOL // assert: lint.Scala_2_13.EOL
-  def eol2 = s"Hello World!$EOL" // assert: lint.Scala_2_13.EOL
-  def elo2b = s"Hello World!${EOL}" // assert: lint.Scala_2_13.EOL
-  def eol3 = "Hello World!" + Platform.EOL // assert: lint.Scala_2_13.EOL
-  def eol4 = s"Hello World!${Platform.EOL}" // assert: lint.Scala_2_13.EOL
-  def eol5 = "Hello World!" + scala.compat.Platform.EOL // assert: lint.Scala_2_13.EOL
-  def eol6 = s"Hello World!${scala.compat.Platform.EOL}" // assert: lint.Scala_2_13.EOL
+  def eol1 = "Hello World!" + EOL // assert: lint.Scala_2_13.platform
+  def eol2 = s"Hello World!$EOL" // assert: lint.Scala_2_13.platform
+  def elo2b = s"Hello World!${EOL}" // assert: lint.Scala_2_13.platform
+  def eol3 = "Hello World!" + Platform.EOL // assert: lint.Scala_2_13.platform
+  def eol4 = s"Hello World!${Platform.EOL}" // assert: lint.Scala_2_13.platform
+  def eol5 = "Hello World!" + scala.compat.Platform.EOL // assert: lint.Scala_2_13.platform
+  def eol6 = s"Hello World!${scala.compat.Platform.EOL}" // assert: lint.Scala_2_13.platform
 
   def arrow1: PartialFunction[Any, String] = {
     case 0      => "zero"

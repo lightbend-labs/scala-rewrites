@@ -36,8 +36,10 @@ class Substitutions(implicit doc: SemanticDocument) {
 
   // Symbols
 
-  private val EOL        = SymbolMatcher.exact("scala/compat/Platform.EOL.")
-  private val arrowAssoc = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
+  private val EOL         = SymbolMatcher.exact("scala/compat/Platform.EOL.")
+  private val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
+  private val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
+  private val arrowAssoc  = SymbolMatcher.exact("scala/Predef.ArrowAssoc#`→`().")
 
   // Rewrites
 
@@ -69,10 +71,20 @@ class Substitutions(implicit doc: SemanticDocument) {
     RewriteAndDiagnostic(Patch.replaceTree(from, toQ), message(from.pos))
   }
 
-  private val platformEOLDiag = Diagnostic("EOL", "scala.compat.Platform is deprecated in Scala 2.13", _: Position)
+  private val platformDiag = Diagnostic("platform", "scala.compat.Platform is deprecated in Scala 2.13", _: Position)
   val platfromEOL: Substitution = {
-    case EOL(i: Importee) => RewriteAndDiagnostic(Patch.removeImportee(i), platformEOLDiag(i.pos))
-    case EOL(t: Term)     => replaceTree(t, "System.lineSeparator", platformEOLDiag)
+    case EOL(i: Importee) => RewriteAndDiagnostic(Patch.removeImportee(i), platformDiag(i.pos))
+    case EOL(t: Term)     => replaceTree(t, "System.lineSeparator", platformDiag)
+  }
+
+  val platformCurrentTime: Substitution = {
+    case currentTime(i: Importee) => RewriteAndDiagnostic(Patch.removeImportee(i), platformDiag(i.pos))
+    case currentTime(t: Term) => replaceTree(t, "System.currentTimeMillis", platformDiag)
+  }
+
+  val platformArraycopy: Substitution = {
+    case arraycopy(i: Importee)      => RewriteAndDiagnostic(Patch.removeImportee(i), platformDiag(i.pos))
+    case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy", platformDiag)
   }
 
   private val unicodeDoubleArrowDiag = Diagnostic("unicodeDoubleArrow", "Unicode arrows are deprecated in Scala 2.13", _: Position)

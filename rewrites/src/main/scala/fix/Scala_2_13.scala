@@ -7,9 +7,6 @@ import scala.annotation.tailrec
 import scala.meta._
 
 object Scala_2_13 {
-  val currentTime = SymbolMatcher.exact("scala/compat/Platform.currentTime().")
-  val arraycopy   = SymbolMatcher.exact("scala/compat/Platform.arraycopy().")
-
   val deprecatedConsoleReadBoolean = SymbolMatcher.exact("scala/DeprecatedConsole#readBoolean().")
   val deprecatedConsoleReadByte    = SymbolMatcher.exact("scala/DeprecatedConsole#readByte().")
   val deprecatedConsoleReadChar    = SymbolMatcher.exact("scala/DeprecatedConsole#readChar().")
@@ -70,11 +67,6 @@ final class Scala_2_13 extends SemanticRule("fix.Scala_2_13") {
     }
 
     val fixTree: PartialFunction[Tree, Patch] = {
-      case currentTime(i: Importee) => Patch.removeImportee(i)
-      case currentTime(t: Term)     => replaceTree(t, "System.currentTimeMillis")
-
-      case arraycopy(i: Importee)      => Patch.removeImportee(i)
-      case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
 
       case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
       case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
@@ -98,7 +90,7 @@ final class Scala_2_13 extends SemanticRule("fix.Scala_2_13") {
     val subs = new Substitutions
     val toRun = {
       import subs._
-      List(platfromEOL, unicodeArrows, symbolLiteral)
+      List(platfromEOL, platformCurrentTime, platformArraycopy, unicodeArrows, symbolLiteral)
     }
     subs.rewrite(doc.tree, toRun) + oldStyle
   }
