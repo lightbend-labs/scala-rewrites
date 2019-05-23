@@ -1,11 +1,12 @@
-package fix
+package fix.scala213
 
 import scala.compat.Platform
 import scala.io.StdIn
 
-object Scala_2_13 {
+object Core {
   def eol1 = "Hello World!" + System.lineSeparator
   def eol2 = s"Hello World!${System.lineSeparator}"
+  def elo2b = s"Hello World!${{System.lineSeparator}}"
   def eol3 = "Hello World!" + System.lineSeparator
   def eol4 = s"Hello World!${System.lineSeparator}"
   def eol5 = "Hello World!" + System.lineSeparator
@@ -35,15 +36,16 @@ object Scala_2_13 {
   def consoleReadf2(format: String)             = StdIn.readf2(format)
   def consoleReadf3(format: String)             = StdIn.readf3(format)
 
-  def arrow1: PartialFunction[Int, String] = {
-    case 0          => "zero"
-    case 1           => "one"
-    case 2 =>           "two"
-    case n if n > 10 => "ginormous"
+  def arrow1: PartialFunction[Any, String] = {
+    case 0      => "zero"
+    case 1       => "one"
+    case 2 =>       "two"
+    case n: Int  => "ginormous"
+    case "⇒"    => "?"
   }
   def arrow2(f: Int => String) = f(1)
   def arrow3 = {
-    import scala.{ PartialFunction => ?=> }
+    import scala.{PartialFunction => ?=>}
     def f: Int ?=> String = {
       case 1 => "one"
     }

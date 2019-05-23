@@ -1,14 +1,15 @@
 /*
-rule = Scala_2_13
+rule = fix.scala213.Core
 */
-package fix
+package fix.scala213
 
 import scala.compat.Platform
-import scala.compat.Platform.{ EOL, arraycopy, currentTime }
+import scala.compat.Platform.{EOL, arraycopy, currentTime}
 
-object Scala_2_13 {
+object Core {
   def eol1 = "Hello World!" + EOL
   def eol2 = s"Hello World!$EOL"
+  def elo2b = s"Hello World!${EOL}"
   def eol3 = "Hello World!" + Platform.EOL
   def eol4 = s"Hello World!${Platform.EOL}"
   def eol5 = "Hello World!" + scala.compat.Platform.EOL
@@ -38,15 +39,16 @@ object Scala_2_13 {
   def consoleReadf2(format: String)             = Console.readf2(format)
   def consoleReadf3(format: String)             = Console.readf3(format)
 
-  def arrow1: PartialFunction[Int, String] = {
-    case 0          => "zero"
-    case 1           ⇒ "one"
-    case 2 ⇒           "two"
-    case n if n > 10 ⇒ "ginormous"
+  def arrow1: PartialFunction[Any, String] = {
+    case 0      => "zero"
+    case 1       ⇒ "one"
+    case 2 ⇒       "two"
+    case n: Int  ⇒ "ginormous"
+    case "⇒"    => "?"
   }
   def arrow2(f: Int ⇒ String) = f(1)
   def arrow3 = {
-    import scala.{ PartialFunction ⇒ ?=> }
+    import scala.{PartialFunction ⇒ ?=>}
     def f: Int ?=> String = {
       case 1 => "one"
     }

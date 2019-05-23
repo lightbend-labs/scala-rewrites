@@ -1,2 +1,5 @@
-fix.Scala_2_13
-fix.Varargs
+fix.scala213.Core
+fix.scala213.ScalaSeq
+fix.scala213.Varargs
+
+lint.scala213.Core
