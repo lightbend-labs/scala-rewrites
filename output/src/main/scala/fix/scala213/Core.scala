@@ -1,9 +1,9 @@
-package fix
+package fix.scala213
 
 import scala.compat.Platform
 import scala.io.StdIn
 
-object Scala_2_13 {
+object Core {
   def eol1 = "Hello World!" + System.lineSeparator
   def eol2 = s"Hello World!${System.lineSeparator}"
   def elo2b = s"Hello World!${{System.lineSeparator}}"
@@ -45,7 +45,7 @@ object Scala_2_13 {
   }
   def arrow2(f: Int => String) = f(1)
   def arrow3 = {
-    import scala.{ PartialFunction => ?=> }
+    import scala.{PartialFunction => ?=>}
     def f: Int ?=> String = {
       case 1 => "one"
     }

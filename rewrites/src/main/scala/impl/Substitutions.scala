@@ -13,7 +13,7 @@ class Substitutions(implicit doc: SemanticDocument) {
   /** Trees will be replaced by one of the patches. Their children are not visited by the [[SubstitutingTraverser]] */
   private val substituted = mutable.Set.empty[Tree]
 
-  val globalImports = new GlobalImports
+  private val globalImports = new GlobalImports
 
   private class SubstitutingTraverser(sub: PartialFunction[Tree, Patch]) extends Traverser {
     val patches = mutable.ListBuffer.empty[Patch]

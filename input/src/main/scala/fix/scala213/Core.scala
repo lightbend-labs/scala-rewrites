@@ -1,12 +1,12 @@
 /*
-rule = fix.Scala_2_13
+rule = fix.scala213.Core
 */
-package fix
+package fix.scala213
 
 import scala.compat.Platform
-import scala.compat.Platform.{ EOL, arraycopy, currentTime }
+import scala.compat.Platform.{EOL, arraycopy, currentTime}
 
-object Scala_2_13 {
+object Core {
   def eol1 = "Hello World!" + EOL
   def eol2 = s"Hello World!$EOL"
   def elo2b = s"Hello World!${EOL}"
@@ -48,7 +48,7 @@ object Scala_2_13 {
   }
   def arrow2(f: Int ⇒ String) = f(1)
   def arrow3 = {
-    import scala.{ PartialFunction ⇒ ?=> }
+    import scala.{PartialFunction ⇒ ?=>}
     def f: Int ?=> String = {
       case 1 => "one"
     }
