@@ -4,9 +4,9 @@ rule = lint.Scala_2_13
 package lint
 
 import scala.compat.Platform
-import scala.compat.Platform.EOL // assert: lint.Scala_2_13.platform
+import scala.compat.Platform.{ EOL, arraycopy, currentTime } // assert: lint.Scala_2_13.platform
 
-class Scala_2_13 {
+object Scala_2_13 {
   def eol1 = "Hello World!" + EOL // assert: lint.Scala_2_13.platform
   def eol2 = s"Hello World!$EOL" // assert: lint.Scala_2_13.platform
   def elo2b = s"Hello World!${EOL}" // assert: lint.Scala_2_13.platform
@@ -14,6 +14,15 @@ class Scala_2_13 {
   def eol4 = s"Hello World!${Platform.EOL}" // assert: lint.Scala_2_13.platform
   def eol5 = "Hello World!" + scala.compat.Platform.EOL // assert: lint.Scala_2_13.platform
   def eol6 = s"Hello World!${scala.compat.Platform.EOL}" // assert: lint.Scala_2_13.platform
+
+  def currentTimeMillis1 = currentTime // assert: lint.Scala_2_13.platform
+  def currentTimeMillis2 = Platform.currentTime // assert: lint.Scala_2_13.platform
+  def currentTimeMillis3 = scala.compat.Platform.currentTime // assert: lint.Scala_2_13.platform
+  def currentTimeMillis4 = s"now: $currentTime" // assert: lint.Scala_2_13.platform
+
+  def arrayCopy1() = arraycopy(null, 0, null, 0, 0) // assert: lint.Scala_2_13.platform
+  def arrayCopy2() = Platform.arraycopy(null, 0, null, 0, 0) // assert: lint.Scala_2_13.platform
+  def arrayCopy3() = scala.compat.Platform.arraycopy(null, 0, null, 0, 0) // assert: lint.Scala_2_13.platform
 
   def arrow1: PartialFunction[Any, String] = {
     case 0      => "zero"
