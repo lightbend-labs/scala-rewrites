@@ -41,6 +41,7 @@ abstract class Any2StringAdd {
   def double1 = double + s          // TODO
 
   // With infix operators, make sure to use parens
-  def parens1 = Nil ++ Nil + s      // TODO
+  def parens1 = Nil ++ Nil + s
   def parens2 = int + int + s       // TODO
+  def parens3 = {Nil ++ Nil} + s
 }
