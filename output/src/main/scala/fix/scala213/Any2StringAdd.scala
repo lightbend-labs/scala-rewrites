@@ -29,23 +29,23 @@ abstract class Any2StringAdd {
   //
   def unit1 = unit.toString + s
   def bool1 = bool.toString + s
-  def byte1 = byte.toString + s
+  def byte1 = "" + byte + s
   def byte2 = byte + byte
-  def short1 = short.toString + s
+  def short1 = "" + short + s
   def short2 = short + short
-  def char1 = char.toString + s
+  def char1 = "" + char + s
   def char2 = char + char
-  def int1 = int.toString + s
+  def int1 = "" + int + s
   def int2 = int + int
-  def long1 = long.toString + s
+  def long1 = "" + long + s
   def long2 = long + long
-  def float1 = float.toString + s
+  def float1 = "" + float + s
   def float2 = float + float
-  def double1 = double.toString + s
+  def double1 = "" + double + s
   def double2 = double + double
 
   // With infix operators, make sure to use parens
   def parens1 = (Nil ++ Nil).toString + s
-  def parens2 = (int + int).toString + s
+  def parens2 = "" + (int + int) + s
   def parens3 = {Nil ++ Nil}.toString + s
 }
