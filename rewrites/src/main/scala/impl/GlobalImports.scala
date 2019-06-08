@@ -5,7 +5,7 @@ import scalafix.v1._
 import scala.collection.mutable
 import scala.meta._
 
-class GlobalImports {
+final class GlobalImports {
   private val known = mutable.Set.empty[String]
   private val added = mutable.ListBuffer.empty[Patch]
 
