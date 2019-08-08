@@ -10,7 +10,7 @@ sbt ~tests/test
 ## To run the rule
 
 0. Publish the rule: `publishLocal`
-1. Add sbt-scalafix: `addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.4")`
+1. Add sbt-scalafix: `addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.5")`
 2. Add SemanticDB: `addCompilerPlugin(scalafixSemanticdb)`
 3. Configure Semantic DB: `scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")`
 4. Run the rule: `scalafix dependency:Scala213@org.scala-lang:scala-rewrites:0.1.0-SNAPSHOT`
