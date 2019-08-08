@@ -25,7 +25,7 @@ val output = project.settings(skip in publish := true)
 
 val output213 = output.withId("output213").settings(
   target := (target.value / "../target-2.13").getCanonicalFile,
-  scalaVersion := "2.13.0-RC2",
+  scalaVersion := "2.13.0",
 )
 
 val tests = project.dependsOn(rewrites).enablePlugins(ScalafixTestkitPlugin).settings(
