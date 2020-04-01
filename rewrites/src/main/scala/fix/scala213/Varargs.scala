@@ -1,26 +1,18 @@
 package fix.scala213
 
-import scalafix.v1._
-
 import scala.meta._
 
+import scalafix.v1._
+
+import impl.SignatureMatcher
+
 object Varargs {
-  val scSeq = new SignatureMatcher(SymbolMatcher.exact("scala/collection/Seq#"))
-}
+  val scSeq = SignatureMatcher.exact("scala/collection/Seq#")
+}; import Varargs._
 
 final class Varargs extends SemanticRule("fix.scala213.Varargs") {
-  import Varargs._
-
-  override def fix(implicit doc: SemanticDocument): Patch = {
+  override def fix(implicit doc: SemanticDocument): Patch =
     doc.tree.collect {
       case Term.Repeated(scSeq(expr)) => Patch.addRight(expr, ".toSeq")
     }.asPatch
-  }
-}
-
-final class SignatureMatcher(symbolMatcher: SymbolMatcher) {
-  def unapply(tree: Tree)(implicit sdoc: SemanticDocument): Option[Tree] =
-    tree.symbol.info.map(_.signature).collect {
-      case ValueSignature(TypeRef(_, symbolMatcher(_), _)) => tree
-    }
 }

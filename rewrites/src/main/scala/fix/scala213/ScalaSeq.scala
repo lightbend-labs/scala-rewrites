@@ -1,13 +1,15 @@
 package fix.scala213
 
-import impl.CollectingTraverser
 import metaconfig.generic.Surface
 import metaconfig.{ConfDecoder, Configured}
-import scalafix.v1._
+
 import scala.meta._
 
-final class ScalaSeq(val config: ScalaSeqConfig) extends SemanticRule("fix.scala213.ScalaSeq") {
-  def this() = this(ScalaSeqConfig())
+import scalafix.v1._
+
+final class ScalaSeq(val config: ScalaSeq.Config) extends SemanticRule("fix.scala213.ScalaSeq") {
+  def this() = this(ScalaSeq.Config())
+  import ScalaSeq._
 
   override def withConfiguration(config: Configuration): Configured[Rule] = {
     // the following don't seem to work:
@@ -18,22 +20,12 @@ final class ScalaSeq(val config: ScalaSeqConfig) extends SemanticRule("fix.scala
       .map(new ScalaSeq(_))
   }
 
-  override def fix(implicit doc: SemanticDocument): Patch =
-    new ScalaSeq.Traverser(config).rewrite(doc.tree)
-}
-
-object ScalaSeq {
-  private val scalaSeq = SymbolMatcher.exact("scala/package.Seq#")
-
-  final class Traverser(config: ScalaSeqConfig)(implicit doc: SemanticDocument)
-      extends CollectingTraverser
-  {
+  override def fix(implicit doc: SemanticDocument) = new impl.CollectingTraverser {
     private var inParam = false
 
-    private def toImporter(s: String) = if (s.isEmpty) None else Some(s.parse[Importer].get)
-
-    val paramImport: Option[Importer] = toImporter(config.paramImport)
-    val otherImport: Option[Importer] = toImporter(config.otherImport)
+    private val paramImport: Option[Importer] = toImporter(config.paramImport)
+    private val otherImport: Option[Importer] = toImporter(config.otherImport)
+    private def toImporter(s: String)         = if (s.isEmpty) None else Some(s.parse[Importer].get)
 
     override def apply(tree: Tree): Unit = tree match {
       case p: Term.Param =>
@@ -44,27 +36,32 @@ object ScalaSeq {
 
       case scalaSeq(Type.Apply(t, _)) =>
         val sub = if (inParam) {
-          paramImport.foreach(globalImports.add)
+          paramImport.foreach(i => patch += globalImports.add(i))
           config.paramType
         } else {
-          otherImport.foreach(globalImports.add)
+          otherImport.foreach(i => patch += globalImports.add(i))
           config.otherType
         }
-        patches += Patch.replaceTree(t, sub)
+        patch += Patch.replaceTree(t, sub)
 
-      case _ => super.apply(tree)
+      case _ =>
+        super.apply(tree)
     }
-  }
+  }.run(doc.tree)
 }
 
-final case class ScalaSeqConfig(
-    paramType: String = "collection.Seq",
-    paramImport: String = "scala.collection",
-    otherType: String = "immutable.Seq",
-    otherImport: String = "scala.collection.immutable",
-)
+object ScalaSeq {
+  private val scalaSeq = SymbolMatcher.exact("scala/package.Seq#")
 
-object ScalaSeqConfig {
-  implicit val surface: Surface[ScalaSeqConfig] = metaconfig.generic.deriveSurface[ScalaSeqConfig]
-  implicit val decoder: ConfDecoder[ScalaSeqConfig] = metaconfig.generic.deriveDecoder(new ScalaSeqConfig())
+  final case class Config(
+      paramType: String   = "collection.Seq",
+      otherType: String   = "immutable.Seq",
+      paramImport: String = "scala.collection",
+      otherImport: String = "scala.collection.immutable",
+  )
+
+  object Config {
+    implicit val surface: Surface[Config]     = metaconfig.generic.deriveSurface[Config]
+    implicit val decoder: ConfDecoder[Config] = metaconfig.generic.deriveDecoder(new Config())
+  }
 }
