@@ -20,7 +20,7 @@ object NoAutoApply {
   new java.util.ArrayList[Int]().toString
   val builder = List.newBuilder[Int]
   builder.result()
-  builder result ()
+//builder result ()
   builder.result()
   fix.scala213.NoAutoApply.buz.empty[String]()
   var opt: Option[() => Int] = None
