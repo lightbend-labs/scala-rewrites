@@ -13,10 +13,11 @@ skip in publish := true
 val rewrites = project.settings(
   moduleName := "scala-rewrites",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion,
+  libraryDependencies += "org.scalameta" %% "scalameta"     % "4.3.8",
 )
 
 val input = project.settings(
-  addCompilerPlugin(scalafixSemanticdb),
+  addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.3.8" cross CrossVersion.full),
   scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
   skip in publish := true,
 )
