@@ -11,17 +11,18 @@ abstract class Any2StringAdd {
   def str3 = "bob" + s
   def str4 = "bob" + "fred"
 
-  // Non-strings: add toString
+  // Non-strings: wrap with String.valueOf
+  def n: Any = null
   def nil = Nil + s
+  def none = None + s
+  def Null = n + s
 
-  // Non-string, generic type: add toString
+  // Non-string, generic type: wrap with String.valueOf
   type A
   def x: A
   def generic = x + "bob"
 
-  // Primitives: add toString
-  def unit = ()
-  def bool = true
+  // Numeric primitives: add toString
   def byte = 1.toByte
   def short = 1.toShort
   def char = 'a'
@@ -30,8 +31,6 @@ abstract class Any2StringAdd {
   def float = 1.0F
   def double = 1.0
   //
-  def unit1 = unit + s
-  def bool1 = bool + s
   def byte1 = byte + s
   def byte2 = byte + byte
   def short1 = short + s
@@ -47,8 +46,26 @@ abstract class Any2StringAdd {
   def double1 = double + s
   def double2 = double + double
 
+  // Boolean: wrap with String.valueOf (there's no + on Boolean, AFAICT)
+  def bool = true
+  def bool1 = bool + s
+
+  // Scala's Unit primitive: wrap with String.valueOf (there's no + on Unit, AFAICT)
+  def unit = ()
+  def unit1 = unit + s
+
+  // Custom value types: wrap with String.valueOf (adding toString would be preferable)
+  import Any2StringAdd.Name
+  //val name: Name = null // type mismatch; found: Null(null), required: Name
+  val name = new Name(null)
+  def name1 = name + s
+
   // With infix operators, make sure to use parens
   def parens1 = Nil ++ Nil + s
   def parens2 = int + int + s
   def parens3 = {Nil ++ Nil} + s
+}
+
+object Any2StringAdd {
+  final class Name(val value: String) extends AnyVal { override def toString = value }
 }
