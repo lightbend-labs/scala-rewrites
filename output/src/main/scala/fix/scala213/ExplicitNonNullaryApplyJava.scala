@@ -1,3 +1,4 @@
+
 package fix.scala213
 
 import ExplicitNonNullaryApplyJavaDefs._
@@ -5,11 +6,11 @@ import ExplicitNonNullaryApplyJavaDefs._
 class ExplicitNonNullaryApplyJava {
   any.##()
   any.getClass()
-  any.getClass()
+  any.getClass
   any.hashCode()
-  any.hashCode()
+  any.hashCode
   any.toString()
-  any.toString()
+  any.toString
 
   ref.##
   ref.getClass()
@@ -36,32 +37,32 @@ class ExplicitNonNullaryApplyJava {
   str.toString
 
   cm.toString()
-  cm.toString()
+  cm.toString
   cp.toString()
-  cp.toString()
+  cp.toString
 
   cm.run()
-  cm.run()
+  cm.run
   cp.run()
-  cp.run()
+  cp.run
 
   cm.foo()
-  cm.foo()
+  cm.foo
   cp.foo()
-  cp.foo()
+  cp.foo
 
   vcm.toString()
-  vcm.toString()
+  vcm.toString
   vcp.toString()
-  vcp.toString()
+  vcp.toString
 
   ccm.toString()
-  ccm.toString()
+  ccm.toString
   ccp.toString()
-  ccp.toString()
+  ccp.toString
 
   vccm.toString()
-  vccm.toString()
+  vccm.toString
   vccp.toString()
-  vccp.toString()
+  vccp.toString
 }

@@ -1,3 +1,4 @@
+
 package fix.scala213
 
 object NoAutoApply {
@@ -25,8 +26,8 @@ object NoAutoApply {
   fix.scala213.NoAutoApply.buz.empty[String]()
   var opt: Option[() => Int] = None
   opt = None
-  println(1.toString())
-  println(buz.toString()) // not inserted
+  println(1.toString)
+  println(buz.toString) // not inserted
   List(builder) map (_.result())
   builder.##
   def lzy(f: => Int) = {
