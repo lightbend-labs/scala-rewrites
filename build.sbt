@@ -12,7 +12,7 @@ skip in publish := true
 
 val rewrites = project.settings(
   moduleName := "scala-rewrites",
-  libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % scalafixVersion,
+  libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % scalafixVersion,
 )
 
 val input = project.settings(
