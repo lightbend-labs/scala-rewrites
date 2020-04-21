@@ -4,7 +4,7 @@ package fix.scala213
 import ExplicitNonNullaryApplyJavaDefs._
 
 class ExplicitNonNullaryApplyJava {
-  ???.##()
+  ???.##
   ???.getClass()
   ???.getClass
   ???.hashCode()
@@ -14,7 +14,7 @@ class ExplicitNonNullaryApplyJava {
   ???.asInstanceOf[Int]
   ???.isInstanceOf[Int]
 
-  any.##()
+  any.##
   any.getClass()
   any.getClass
   any.hashCode()

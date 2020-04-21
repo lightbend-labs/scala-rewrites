@@ -36,7 +36,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     def fix(tree: Tree, meth: Term, noTypeArgs: Boolean, noArgs: Boolean) = {
       for {
         name <- termName(meth)
-        if handled.add(name)
+        if handled.add(name) && name.value != "##" // fast-track https://github.com/scala/scala/pull/8814
         if noArgs
         if name.isReference
         if !name.parent.exists(_.is[Term.ApplyInfix])
