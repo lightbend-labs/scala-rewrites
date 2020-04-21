@@ -6,6 +6,16 @@ package fix.scala213
 import ExplicitNonNullaryApplyJavaDefs._
 
 class ExplicitNonNullaryApplyJava {
+  ???.##
+  ???.getClass()
+  ???.getClass
+  ???.hashCode()
+  ???.hashCode
+  ???.toString()
+  ???.toString
+  ???.asInstanceOf[Int]
+  ???.isInstanceOf[Int]
+
   any.##
   any.getClass()
   any.getClass
@@ -13,6 +23,8 @@ class ExplicitNonNullaryApplyJava {
   any.hashCode
   any.toString()
   any.toString
+  any.asInstanceOf[Int]
+  any.isInstanceOf[Int]
 
   ref.##
   ref.getClass()
@@ -21,6 +33,8 @@ class ExplicitNonNullaryApplyJava {
   ref.hashCode
   ref.toString()
   ref.toString
+  ref.asInstanceOf[Int]
+  ref.isInstanceOf[Int]
 
   obj.##
   obj.getClass()
@@ -29,6 +43,8 @@ class ExplicitNonNullaryApplyJava {
   obj.hashCode
   obj.toString()
   obj.toString
+  obj.asInstanceOf[Int]
+  obj.isInstanceOf[Int]
 
   str.##
   str.getClass()
@@ -37,6 +53,8 @@ class ExplicitNonNullaryApplyJava {
   str.hashCode
   str.toString()
   str.toString
+  str.asInstanceOf[Int]
+  str.isInstanceOf[Int]
 
   cm.toString()
   cm.toString
