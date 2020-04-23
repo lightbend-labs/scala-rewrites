@@ -1,6 +1,13 @@
 package fix.scala213
 
 class ExplicitNonNullaryApply {
+  def multiParamsListTest = {
+    def await()(implicit time: Int) = ???
+    implicit val time: Int = 1
+    await() // fix
+    await() // keep
+  }
+
   val enna = new ExplicitNonNullaryApply()
 
   def prop            = ""
