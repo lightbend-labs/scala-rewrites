@@ -70,4 +70,6 @@ class ExplicitNonNullaryApply {
   def def_enna_enna_id_m_ta    = enna.enna.id[String]("")
   def def_enna_enna_id_m_in    = enna.enna id ""
   def def_enna_enna_id_m_in_ta = enna.enna id[String] ""
+
+  def eta = meth _
 }

@@ -40,6 +40,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if noArgs
         if name.isReference
         if !name.parent.exists(_.is[Term.ApplyInfix])
+        if !tree.parent.exists(_.is[Term.Eta])
         info <- name.symbol.info
         if !power.isJavaDefined(name) // !info.isJava
         if cond(info.signature) { case MethodSignature(_, List(Nil), _) => true }
