@@ -39,7 +39,9 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if handled.add(name) && name.value != "##" // fast-track https://github.com/scala/scala/pull/8814
         if noArgs
         if name.isReference
-        if !name.parent.exists(_.is[Term.ApplyInfix])
+        if !cond(name.parent) {
+          case Some(Term.ApplyInfix(_, `name`, _, _)) => true
+        }
         if !tree.parent.exists(_.is[Term.Eta])
         info <- name.symbol.info
         if !power.isJavaDefined(name) // !info.isJava
