@@ -45,6 +45,13 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if !power.isJavaDefined(name) // !info.isJava
         if cond(info.signature) {
           case MethodSignature(_, List(Nil, _*), _) => true
+          case ClassSignature(_, _, _, decls) if tree.isInstanceOf[Term.ApplyType] =>
+            decls.exists { decl =>
+              decl.displayName == "apply" &&
+                cond(decl.signature) {
+                  case MethodSignature(_, List(Nil, _*), _) => true
+                }
+            }
         }
       } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
     }.asPatch
