@@ -79,4 +79,22 @@ class ExplicitNonNullaryApply {
   def def_enna_enna_id_m_in_ta = enna.enna id[String] ""
 
   def eta = meth _
+
+  trait testPostfixOps {
+    import scala.language.postfixOps
+
+    def qual(): ExplicitNonNullaryApply
+
+    enna.meth();
+//    enna meth() // won't compile
+
+    qual().meth();
+    qual().meth();
+//    qual meth()   // won't compile
+//    qual() meth() // won't compile
+    qual().meth();
+    qual().meth();
+    qual().meth()
+    qual().meth()
+  }
 }

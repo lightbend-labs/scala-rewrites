@@ -53,7 +53,27 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
                 }
             }
         }
-      } yield Patch.addRight(if (noTypeArgs) name else tree, "()")
+      } yield {
+        val right = Patch.addRight(if (noTypeArgs) name else tree, "()")
+        name.parent match {
+          // scalameta:trees don't have PostfixSelect like
+          // scala.tools.nsc.ast.Trees.PostfixSelect
+          // so we have to check if Token.Dot is existed
+          case Some(Term.Select(qual, `name`)) =>
+            val qualLast = qual.tokens.last
+            val nameHead = name.tokens.head
+            val tokens = doc.tokenList
+            val sliced = tokens.slice(tokens.next(qualLast), nameHead)
+            if (sliced.exists(_.is[Token.Dot])) {
+              right
+            } else {
+              Patch.removeTokens(tokens.trailingSpaces(qualLast)) +
+                Patch.addLeft(nameHead, ".") +
+                right
+            }
+          case _ => right
+        }
+      }
     }.asPatch
 
     doc.tree.collect {
