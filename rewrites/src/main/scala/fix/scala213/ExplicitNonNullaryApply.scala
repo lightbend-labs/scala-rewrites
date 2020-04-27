@@ -43,7 +43,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
           case Some(Term.ApplyInfix(_, `name`, _, _)) => true
         }
         if !tree.parent.exists(_.is[Term.Eta])
-        info <- name.symbol.info
+        info <- Workaround1104.symbol(name).info
         if !power.isJavaDefined(name) // !info.isJava
         if cond(info.signature) {
           case MethodSignature(_, List(Nil, _*), _) => true
@@ -56,7 +56,10 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
             }
         }
       } yield {
-        val right = Patch.addRight(if (noTypeArgs) name else tree, "()")
+        val tok =
+          if (noTypeArgs) Workaround1104.lastToken(name)
+          else tree.tokens.last
+        val right = Patch.addRight(tok, "()")
         name.parent match {
           // scalameta:trees don't have PostfixSelect like
           // scala.tools.nsc.ast.Trees.PostfixSelect
