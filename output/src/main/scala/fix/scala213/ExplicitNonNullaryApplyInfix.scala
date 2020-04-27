@@ -16,4 +16,6 @@ trait ExplicitNonNullaryApplyInfixSpec extends Matchers {
   lhs() shouldBe arg()
   lhs() shouldBe arg()
   lhs() shouldBe arg()
+
+  lhs() shouldBe (arg())
 }
