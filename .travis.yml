@@ -6,6 +6,7 @@ env: ADOPTOPENJDK=8
 scala:
   - 2.12
   - 2.12.next
+  - 2.13
 script: sbt test
 
 notifications:
