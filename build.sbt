@@ -1,7 +1,6 @@
 import _root_.scalafix.sbt.BuildInfo._
 import sbt.librarymanagement.Configurations.CompilerPlugin
 
-def scala213 = "2.13.3"
 def scalametaVersion = "4.3.17"
 
 inThisBuild(List(
@@ -10,6 +9,7 @@ inThisBuild(List(
   developers := List(Developer("", "", "", url("https://github.com/scala/scala-rewrites/graphs/contributors"))),
   homepage := Some(url("https://github.com/scala/scala-rewrites")),
   scalaVersion := scala212,
+  crossScalaVersions := Seq(scala212, scala213),
   publish / skip := true,
 ))
 
@@ -24,10 +24,13 @@ val input = project.enablePlugins(ScalaNightlyPlugin).settings(
   libraryDependencies += "org.scalameta" % "semanticdb-scalac" % scalametaVersion % CompilerPlugin cross CrossVersion.patch,
 )
 
-val output    = project
+val output = project
+
+// This project is used to verify that the output code actually compiles with scala 2.13
 val output213 = output.withId("output213").settings(
   target := file(s"${target.value.getPath}-2.13"),
   scalaVersion := scala213,
+  crossScalaVersions := Seq(scalaVersion.value),
 )
 
 val tests = project.dependsOn(rewrites).enablePlugins(ScalaNightlyPlugin, ScalafixTestkitPlugin).settings(
