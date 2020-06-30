@@ -1,5 +1,8 @@
-import _root_.scalafix.sbt.BuildInfo.{ scala212, scala213, scalafixVersion, scalametaVersion }
+import _root_.scalafix.sbt.BuildInfo._
 import sbt.librarymanagement.Configurations.CompilerPlugin
+
+def scala213 = "2.13.3"
+def scalametaVersion = "4.3.17"
 
 inThisBuild(List(
   organization := "org.scala-lang",
