@@ -1,4 +1,5 @@
-import _root_.scalafix.sbt.BuildInfo.{ scala212, scalafixVersion }
+import _root_.scalafix.sbt.BuildInfo.{ scala212, scala213, scalafixVersion, scalametaVersion }
+import sbt.librarymanagement.Configurations.CompilerPlugin
 
 inThisBuild(List(
   organization := "org.scala-lang",
@@ -6,33 +7,33 @@ inThisBuild(List(
   developers := List(Developer("", "", "", url("https://github.com/scala/scala-rewrites/graphs/contributors"))),
   homepage := Some(url("https://github.com/scala/scala-rewrites")),
   scalaVersion := scala212,
+  skip in publish := true,
 ))
 
-skip in publish := true
-
-val rewrites = project.settings(
+val rewrites = project.enablePlugins(ScalaNightlyPlugin).settings(
   moduleName := "scala-rewrites",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % scalafixVersion,
+  skip in publish := false,
 )
 
-val input = project.settings(
-  addCompilerPlugin(scalafixSemanticdb),
+val input = project.enablePlugins(ScalaNightlyPlugin).settings(
   scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
-  skip in publish := true,
+  libraryDependencies += "org.scalameta" % "semanticdb-scalac" % scalametaVersion % CompilerPlugin cross CrossVersion.patch,
 )
 
-val output = project.settings(skip in publish := true)
-
+val output    = project
 val output213 = output.withId("output213").settings(
-  target := (target.value / "../target-2.13").getCanonicalFile,
-  scalaVersion := "2.13.0",
+  target := file(s"${target.value.getPath}-2.13"),
+  scalaVersion := scala213,
 )
 
-val tests = project.dependsOn(rewrites).enablePlugins(ScalafixTestkitPlugin).settings(
-  skip in publish := true,
-  libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.full,
+val tests = project.dependsOn(rewrites).enablePlugins(ScalaNightlyPlugin, ScalafixTestkitPlugin).settings(
+  libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.patch,
   compile in Compile := (compile in Compile).dependsOn(compile in (input, Compile)).value,
   scalafixTestkitOutputSourceDirectories := (sourceDirectories in (output, Compile)).value,
   scalafixTestkitInputSourceDirectories := (sourceDirectories in (input, Compile)).value,
   scalafixTestkitInputClasspath := (fullClasspath in (input, Compile)).value,
+  ScalaNightlyPlugin.ifNightly(Test / fork := true),
 )
+
+ScalaNightlyPlugin.bootstrapSettings
