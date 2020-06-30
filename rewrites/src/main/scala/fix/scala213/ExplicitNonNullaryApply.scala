@@ -13,6 +13,10 @@ import scalafix.v1._
 import scalafix.internal.rule.CompilerException
 import scalafix.internal.v1.LazyValue
 
+/** Explicitly insert () to non-nullary method applications that lack it.
+ *  https://dotty.epfl.ch/docs/reference/dropped-features/auto-apply.html
+ *  https://github.com/scala/scala/pull/8833
+ */
 final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     extends SemanticRule("fix.scala213.ExplicitNonNullaryApply")
 {
@@ -36,48 +40,33 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     def fix(tree: Tree, meth: Term, noTypeArgs: Boolean, noArgs: Boolean) = {
       for {
         name <- termName(meth)
-        if handled.add(name) && name.value != "##" // fast-track https://github.com/scala/scala/pull/8814
+        if name.value != "##" // fast-track https://github.com/scala/scala/pull/8814
+        if handled.add(name)
         if noArgs
         if name.isReference
-        if !cond(name.parent) {
-          case Some(Term.ApplyInfix(_, `name`, _, _)) => true
-        }
-        if !tree.parent.exists(_.is[Term.Eta])
-        info <- Workaround1104.symbol(name).info
-        if !power.isJavaDefined(name) // !info.isJava
+        if !cond(name.parent) { case Some(Term.ApplyInfix(_, `name`, _, _)) => true }
+        if !tree.parent.exists(_.is[Term.Eta]) // else rewrites `meth _` to `meth() _`, or requires running ExplicitNullaryEtaExpansion first
+        info <- name.symbol.info
+        if !power.isJavaDefined(name)
         if cond(info.signature) {
-          case MethodSignature(_, List(Nil, _*), _) => true
+          case MethodSignature(_, Nil :: _, _) => true
           case ClassSignature(_, _, _, decls) if tree.isInstanceOf[Term.ApplyType] =>
             decls.exists { decl =>
               decl.displayName == "apply" &&
-                cond(decl.signature) {
-                  case MethodSignature(_, List(Nil, _*), _) => true
-                }
+                cond(decl.signature) { case MethodSignature(_, Nil :: _, _) => true }
             }
         }
       } yield {
-        val tok =
-          if (noTypeArgs) Workaround1104.lastToken(name)
-          else tree.tokens.last
-        val right = Patch.addRight(tok, "()")
-        name.parent match {
-          // scalameta:trees don't have PostfixSelect like
-          // scala.tools.nsc.ast.Trees.PostfixSelect
-          // so we have to check if Token.Dot is existed
-          case Some(Term.Select(qual, `name`)) =>
-            val qualLast = qual.tokens.last
-            val nameHead = name.tokens.head
-            val tokens = doc.tokenList
-            val sliced = tokens.slice(tokens.next(qualLast), nameHead)
-            if (sliced.exists(_.is[Token.Dot])) {
-              right
-            } else {
-              Patch.removeTokens(tokens.trailingSpaces(qualLast)) +
-                Patch.addLeft(nameHead, ".") +
-                right
-            }
-          case _ => right
+        val optAddDot = name.parent.collect {
+          case PostfixSelect(qual, `name`) =>
+            Patch.removeTokens(doc.tokenList.trailingSpaces(qual.tokens.last)) +
+              Patch.addLeft(name.tokens.head, ".")
         }
+        val target = if (noTypeArgs) name else tree
+        // WORKAROUND scalameta/scalameta#1083
+        // Fixes `lhs op (arg)` from being rewritten as `lhs op (arg)()` (instead of `lhs op (arg())`)
+        val token = target.tokens.reverseIterator.find(!_.is[Token.RightParen]).get
+        optAddDot.asPatch + Patch.addRight(token, "()")
       }
     }.asPatch
 
@@ -85,6 +74,18 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
       case t @ q"$meth[..$targs](...$args)" => fix(t, meth, targs.isEmpty, args.isEmpty)
       case t @ q"$meth(...$args)"           => fix(t, meth, true,          args.isEmpty)
     }.asPatch
+  }
+
+  // No PostfixSelect in Scalameta, so build one
+  private object PostfixSelect {
+    def unapply(t: Tree)(implicit doc: SemanticDocument): Option[(Term, Name)] = t match {
+      case Term.Select(qual, name) =>
+        val tokenList = doc.tokenList
+        val inBetweenSlice = tokenList.slice(tokenList.next(qual.tokens.last), name.tokens.head)
+        if (inBetweenSlice.exists(_.is[Token.Dot])) None
+        else Some((qual, name))
+      case _ => None
+    }
   }
 
   private def termName(term: Term): Option[Name] = condOpt(term) {
