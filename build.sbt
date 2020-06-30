@@ -10,13 +10,13 @@ inThisBuild(List(
   developers := List(Developer("", "", "", url("https://github.com/scala/scala-rewrites/graphs/contributors"))),
   homepage := Some(url("https://github.com/scala/scala-rewrites")),
   scalaVersion := scala212,
-  skip in publish := true,
+  publish / skip := true,
 ))
 
 val rewrites = project.enablePlugins(ScalaNightlyPlugin).settings(
   moduleName := "scala-rewrites",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % scalafixVersion,
-  skip in publish := false,
+  publish / skip := false,
 )
 
 val input = project.enablePlugins(ScalaNightlyPlugin).settings(
@@ -32,10 +32,10 @@ val output213 = output.withId("output213").settings(
 
 val tests = project.dependsOn(rewrites).enablePlugins(ScalaNightlyPlugin, ScalafixTestkitPlugin).settings(
   libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.patch,
-  compile in Compile := (compile in Compile).dependsOn(compile in (input, Compile)).value,
-  scalafixTestkitOutputSourceDirectories := (sourceDirectories in (output, Compile)).value,
-  scalafixTestkitInputSourceDirectories := (sourceDirectories in (input, Compile)).value,
-  scalafixTestkitInputClasspath := (fullClasspath in (input, Compile)).value,
+  Compile / compile := (Compile / compile).dependsOn(input / Test / compile).value,
+  scalafixTestkitInputClasspath          := ( input / Test / fullClasspath).value,
+  scalafixTestkitInputSourceDirectories  := ( input / Test / sourceDirectories).value,
+  scalafixTestkitOutputSourceDirectories := (output / Test / sourceDirectories).value,
   ScalaNightlyPlugin.ifNightly(Test / fork := true),
 )
 
