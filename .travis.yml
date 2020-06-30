@@ -3,7 +3,7 @@ import: scala/scala-dev:travis/default.yml
 
 language: scala
 env: ADOPTOPENJDK=8
-scala: 2.12.11
+scala: 2.12
 script: sbt test
 
 notifications:
