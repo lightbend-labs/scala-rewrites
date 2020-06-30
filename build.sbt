@@ -10,13 +10,13 @@ inThisBuild(List(
   skip in publish := true,
 ))
 
-val rewrites = project.settings(
+val rewrites = project.enablePlugins(ScalaNightlyPlugin).settings(
   moduleName := "scala-rewrites",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-rules" % scalafixVersion,
   skip in publish := false,
 )
 
-val input = project.settings(
+val input = project.enablePlugins(ScalaNightlyPlugin).settings(
   scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
   libraryDependencies += "org.scalameta" % "semanticdb-scalac" % scalametaVersion % CompilerPlugin cross CrossVersion.patch,
 )
@@ -27,10 +27,13 @@ val output213 = output.withId("output213").settings(
   scalaVersion := scala213,
 )
 
-val tests = project.dependsOn(rewrites).enablePlugins(ScalafixTestkitPlugin).settings(
+val tests = project.dependsOn(rewrites).enablePlugins(ScalaNightlyPlugin, ScalafixTestkitPlugin).settings(
   libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % scalafixVersion % Test cross CrossVersion.patch,
   compile in Compile := (compile in Compile).dependsOn(compile in (input, Compile)).value,
   scalafixTestkitOutputSourceDirectories := (sourceDirectories in (output, Compile)).value,
   scalafixTestkitInputSourceDirectories := (sourceDirectories in (input, Compile)).value,
   scalafixTestkitInputClasspath := (fullClasspath in (input, Compile)).value,
+  ScalaNightlyPlugin.ifNightly(Test / fork := true),
 )
+
+ScalaNightlyPlugin.bootstrapSettings
