@@ -4,19 +4,17 @@ Scalafix will support 2.13 and 2.11 with cross-building ExplicitNonNullaryApply 
 
 # Scalafix Rewrites for Scala
 
-## To develop the rule
+## To develop a rewrite
 
 ```
 sbt ~tests/test
-# edit rewrites/src/main/scala/fix/Scala213.scala
+# edit rewrites/src/main/scala/...
 ```
 
-## To run the rule
+## To run the rewrites
 
-0. Publish the rule: `publishLocal`
-1. Add sbt-scalafix: `addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.17")`
-2. Add SemanticDB: `addCompilerPlugin(scalafixSemanticdb)`
-3. Configure Semantic DB: `scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on")`
-4. Run a rule you want: `scalafix dependency:RULE_NAME@org.scala-lang:scala-rewrites:0.1.0-SNAPSHOT`
-   - For example, you can run Varargs rule by: `scalafix dependency:fix.scala213.Varargs@org.scala-lang:scala-rewrites:0.1.0-SNAPSHOT` 
-5. Run the rule on test sources: `Test/scalafix dependency:RULE_NAME@org.scala-lang:scala-rewrites:0.1.0-SNAPSHOT`
+1. [Install Scalafix](https://scalacenter.github.io/scalafix/docs/users/installation.html)
+2. Enable synthetics in SemanticDB; e.g. `semanticdbOptions += "-P:semanticdb:synthetics:on"` in sbt 1.3+
+3. Run the [external rule](https://scalacenter.github.io/scalafix/docs/rules/external-rules.html), e.g.:
+  * `scalafix dependency:ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:VERSION`
+  * `Test/scalafix dependency:ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:VERSION`
