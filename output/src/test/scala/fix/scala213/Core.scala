@@ -1,7 +1,6 @@
 package fix.scala213
 
 import scala.compat.Platform
-import scala.io.StdIn
 
 object Core {
   def eol1 = "Hello World!" + System.lineSeparator
@@ -20,21 +19,6 @@ object Core {
   def arrayCopy1() = System.arraycopy(null, 0, null, 0, 0)
   def arrayCopy2() = System.arraycopy(null, 0, null, 0, 0)
   def arrayCopy3() = System.arraycopy(null, 0, null, 0, 0)
-
-  def consoleReadBoolean                        = StdIn.readBoolean()
-  def consoleReadByte                           = StdIn.readByte()
-  def consoleReadChar                           = StdIn.readChar()
-  def consoleReadDouble                         = StdIn.readDouble()
-  def consoleReadFloat                          = StdIn.readFloat()
-  def consoleReadInt                            = StdIn.readInt()
-  def consoleReadLine                           = StdIn.readLine()
-  def consoleReadLine(text: String, args: Any*) = StdIn.readLine(text, args: _*)
-  def consoleReadLong                           = StdIn.readLong()
-  def consoleReadShort                          = StdIn.readShort()
-  def consoleReadf(format: String)              = StdIn.readf(format)
-  def consoleReadf1(format: String)             = StdIn.readf1(format)
-  def consoleReadf2(format: String)             = StdIn.readf2(format)
-  def consoleReadf3(format: String)             = StdIn.readf3(format)
 
   def arrow1: PartialFunction[Any, String] = {
     case 0      => "zero"
