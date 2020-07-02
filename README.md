@@ -21,7 +21,7 @@ inThisBuild(List(
 Then run the desired rewrite(s) ([official docs][2]), in sbt:
 
 ```scala
-> scalafix dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.0`
+> scalafix dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.0
 > Test/scalafix dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.0
 ```
 
