@@ -6,7 +6,7 @@ Add the `sbt-scalafix` sbt plugin, with the SemanticDB compiler plugin enabled (
 
 ```scala
 // project/plugins.sbt
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.17")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.18")
 ```
 
 ```scala
