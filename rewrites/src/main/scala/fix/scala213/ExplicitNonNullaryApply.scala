@@ -94,10 +94,23 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     case Type.Select(_, name: Type.Name) => name
   }
 
-  override def withConfiguration(config: Configuration) =
-    Configured.ok(new ExplicitNonNullaryApply(LazyValue.later { () =>
-      ScalafixGlobal.newCompiler(config.scalacClasspath, config.scalacOptions, Map.empty)
-    }))
+  override def withConfiguration(config: Configuration) = {
+    val compileSv = config.scalaVersion
+    val runtimeSv = scala.util.Properties.versionNumberString
+    if ((compileSv.take(4) != runtimeSv.take(4)) && config.scalacOptions.nonEmpty) {
+      Configured.error(
+        s"Scala version mismatch: " +
+        s"(1) the target sources were compiled with Scala $compileSv; " +
+        s"(2) Scalafix is running on Scala $runtimeSv. " +
+        s"To fix make scalafixScalaBinaryVersion == ${compileSv.take(4)}. " +
+        "Try `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)`."
+      )
+    } else {
+      Configured.ok(new ExplicitNonNullaryApply(LazyValue.later { () =>
+        ScalafixGlobal.newCompiler(config.scalacClasspath, config.scalacOptions, Map.empty)
+      }))
+    }
+  }
 
   override def afterComplete() = shutdownCompiler()
   def shutdownCompiler() = for (g <- global) nonFatalCatch { g.askShutdown(); g.close() }
