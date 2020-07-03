@@ -15,27 +15,26 @@ inThisBuild(List(
   semanticdbEnabled := true,
   semanticdbOptions += "-P:semanticdb:synthetics:on", // make sure to add this
   semanticdbVersion := scalafixSemanticdb.revision,
+  scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
 ))
 ```
 
 Then run the desired rewrite(s) ([official docs][2]), in sbt:
 
 ```scala
-> scalafix dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.0
-> Test/scalafix dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.0
+> scalafixAll dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.1
 ```
 
 You can also add the following to your `build.sbt`:
 
 ```scala
-ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "0.1.0"
+ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "0.1.1"
 ```
 
 and then:
 
 ```scala
-> scalafix fix.scala213.ExplicitNonNullaryApply
-> Test/scalafix fix.scala213.ExplicitNonNullaryApply
+> scalafixAll fix.scala213.ExplicitNonNullaryApply
 ```
 
 [1]: https://scalacenter.github.io/scalafix/docs/users/installation.html
