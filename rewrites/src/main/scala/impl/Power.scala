@@ -19,9 +19,6 @@ final class Power(g: ScalafixGlobal)(implicit doc: SemanticDocument) {
   private def gsymbol(t: Tree): g.Symbol = {
     val sSym = t.symbol
     val gSymbols = g.inverseSemanticdbSymbols(sSym.value)
-    val gSym = gSymbols.find(gSym => g.semanticdbSymbol(gSym) == sSym.value).getOrElse(g.NoSymbol)
-    if (gSym.info.exists(g.definitions.NothingTpe == _))
-      gSym.overrides.lastOption.getOrElse(gSym)
-    else gSym
+    gSymbols.find(gSym => g.semanticdbSymbol(gSym) == sSym.value).getOrElse(g.NoSymbol)
   }
 }
