@@ -40,7 +40,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
 
   private def unsafeFix()(implicit doc: SemanticDocument) = {
     lazy val power = new impl.Power(global.value)
-    val handled = mutable.Set.empty[Name]
+    val handled = mutable.Set.empty[Term.Name]
 
     def fix(tree: Tree, meth: Term, noTypeArgs: Boolean, noArgs: Boolean) = {
       for {
@@ -84,7 +84,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
 
   // No PostfixSelect in Scalameta, so build one
   private object PostfixSelect {
-    def unapply(t: Tree)(implicit doc: SemanticDocument): Option[(Term, Name)] = t match {
+    def unapply(t: Tree)(implicit doc: SemanticDocument): Option[(Term, Term.Name)] = t match {
       case Term.Select(qual, name) =>
         val tokenList = doc.tokenList
         val inBetweenSlice = tokenList.slice(tokenList.next(qual.tokens.last), name.tokens.head)
@@ -94,10 +94,9 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     }
   }
 
-  private def termName(term: Term): Option[Name] = condOpt(term) {
+  private def termName(term: Term): Option[Term.Name] = condOpt(term) {
     case name: Term.Name                 => name
     case Term.Select(_, name: Term.Name) => name
-    case Type.Select(_, name: Type.Name) => name
   }
 
   override def withConfiguration(config: Configuration) = {
