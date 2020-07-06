@@ -42,6 +42,15 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     lazy val power = new impl.Power(global.value)
     val handled = mutable.Set.empty[Term.Name]
 
+    def isJavaDefined(name: Term.Name): Boolean = name.value match {
+      case "toString"     => true // fast-track known, common cases
+      case "getClass"     => true
+      case "hashCode"     => true
+      case "asInstanceOf" => true
+      case "isInstanceOf" => true
+      case _              => power.isJavaDefined(name)
+    }
+
     def fix(tree: Tree, meth: Term, noTypeArgs: Boolean, noArgs: Boolean) = {
       for {
         name <- termName(meth)
@@ -61,7 +70,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
                 cond(decl.signature) { case MethodSignature(_, Nil :: _, _) => true }
             }
         }
-        if !power.isJavaDefined(name) // full check, using the presentation compiler :O
+        if !isJavaDefined(name) // full check, using the presentation compiler :O
       } yield {
         val optAddDot = name.parent.collect {
           case PostfixSelect(qual, `name`) =>
