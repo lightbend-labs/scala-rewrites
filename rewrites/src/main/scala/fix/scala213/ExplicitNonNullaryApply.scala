@@ -25,10 +25,15 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
   override def fix(implicit doc: SemanticDocument): Patch = {
     try unsafeFix() catch {
       case _: CompilerException =>
-        shutdownCompiler()
-        global.restart()
+        // Give it another shot (good old "retry.retry")
+        // as the presentation compiler sometimes just dies and succeeds the next time...
+        shutdownAndResetCompiler()
         try unsafeFix() catch {
-          case _: CompilerException => Patch.empty /* ignore compiler crashes */
+          case _: CompilerException =>
+            // Give up on fixing this file as compiling it crashed the (presentation) compiler twice
+            // but first reset the state of the compiler for the next file
+            shutdownAndResetCompiler()
+            Patch.empty
         }
     }
   }
@@ -47,7 +52,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if !cond(name.parent) { case Some(Term.ApplyInfix(_, `name`, _, _)) => true }
         if !tree.parent.exists(_.is[Term.Eta]) // else rewrites `meth _` to `meth() _`, or requires running ExplicitNullaryEtaExpansion first
         info <- name.symbol.info
-        if !power.isJavaDefined(name)
+        if !info.isJava // shallow, isJavaDefined (below) checks overrides
         if cond(info.signature) {
           case MethodSignature(_, Nil :: _, _) => true
           case ClassSignature(_, _, _, decls) if tree.isInstanceOf[Term.ApplyType] =>
@@ -56,6 +61,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
                 cond(decl.signature) { case MethodSignature(_, Nil :: _, _) => true }
             }
         }
+        if !power.isJavaDefined(name) // full check, using the presentation compiler :O
       } yield {
         val optAddDot = name.parent.collect {
           case PostfixSelect(qual, `name`) =>
@@ -112,6 +118,15 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
     }
   }
 
-  override def afterComplete() = shutdownCompiler()
-  def shutdownCompiler() = for (g <- global) nonFatalCatch { g.askShutdown(); g.close() }
+  override def afterComplete() = shutdownAndResetCompiler()
+
+  def shutdownAndResetCompiler() = {
+    for (g <- global) {
+      nonFatalCatch {
+        g.askShutdown()
+        g.close()
+      }
+    }
+    global.restart() // more of a "reset", as nothing's eagerly started
+  }
 }
