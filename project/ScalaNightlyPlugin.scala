@@ -22,7 +22,8 @@ object ScalaNightlyPlugin extends AutoPlugin {
 
   override def projectSettings = ifNightly(
     scalaVersion := ((LocalRootProject / scalaVersion).value match {
-      case BinCompatV(x, y, z, _, _) => s"$x.$y.${z.toInt - 1}"
+    //case BinCompatV(x, y, z, _, _) => s"$x.$y.${z.toInt - 1}" // Restore when the 2.12 CB is bumped
+      case BinCompatV(x, y, z, _, _) => s"$x.$y.$z"
       case sv                        => sv
     }),
     scalaInstance := {
