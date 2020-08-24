@@ -3,6 +3,7 @@ package fix.scala213
 import scala.PartialFunction.{ cond, condOpt }
 import scala.collection.mutable
 import scala.util.control.Exception.nonFatalCatch
+import scala.util.Try
 
 import metaconfig.Configured
 
@@ -60,7 +61,9 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if name.isReference
         if !cond(name.parent) { case Some(Term.ApplyInfix(_, `name`, _, _)) => true }
         if !tree.parent.exists(_.is[Term.Eta]) // else rewrites `meth _` to `meth() _`, or requires running ExplicitNullaryEtaExpansion first
-        info <- name.symbol.info
+        // HACK: In certain cases, `Symbol.info` may throw `MissingSymbolException` due to some unknown reason
+        // If it happens, here we assume that this symbol has no info
+        info <- Try(name.symbol.info).toOption.flatten
         if !info.isJava // shallow, isJavaDefined (below) checks overrides
         if cond(info.signature) {
           case MethodSignature(_, Nil :: _, _) => true
