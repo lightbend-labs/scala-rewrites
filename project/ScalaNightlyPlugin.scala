@@ -17,7 +17,8 @@ object ScalaNightlyPlugin extends AutoPlugin {
       val sv = props.getProperty("nightly").ensuring(_ != null)
       sLog.value.info(s"Using Scala nightly version $sv")
       sv
-    }
+    },
+    scalaVersion := "2.12.13-bin-9a51b6d", // TODO unpin when Global.reporter()LReporter is restored
   )
 
   override def projectSettings = ifNightly(
