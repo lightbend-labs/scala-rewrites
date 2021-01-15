@@ -18,7 +18,6 @@ object ScalaNightlyPlugin extends AutoPlugin {
       sLog.value.info(s"Using Scala nightly version $sv")
       sv
     },
-    scalaVersion := "2.12.13-bin-42f2bd8", // TODO unpin when the CB has upgraded
   )
 
   override def projectSettings = ifNightly(
