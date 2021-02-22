@@ -28,7 +28,7 @@ Then run the desired rewrite(s) ([official docs][2]), in sbt:
 You can also add the following to your `build.sbt`:
 
 ```scala
-ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "0.1.2"
+ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "0.1.3"
 ```
 
 and then:
