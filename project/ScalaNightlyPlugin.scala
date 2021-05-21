@@ -29,8 +29,8 @@ object ScalaNightlyPlugin extends AutoPlugin {
       val si = (LocalRootProject / scalaInstance).value
       new sbt.internal.inc.ScalaInstance(
         scalaVersion.value,
-        si.loader, si.loaderLibraryOnly,
-        si.libraryJars, si.compilerJar, si.allJars,
+        si.loader, si.loaderCompilerOnly, si.loaderLibraryOnly,
+        si.libraryJars, si.compilerJars, si.allJars,
         si.explicitActual
       )
     }
