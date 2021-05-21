@@ -1,11 +1,11 @@
 package fix
 
 import scala.reflect.ensureAccessible
-import org.scalatest.ConfigMap
-import scalafix.testkit.SemanticRuleSuite
+import org.scalatest.{ ConfigMap, FunSpecLike }
+import scalafix.testkit.AbstractSemanticRuleSuite
 
-class RuleSuite extends SemanticRuleSuite with BeforeAndAfterAllConfigMapAlt {
-  val isSaveExpectField = ensureAccessible(classOf[SemanticRuleSuite].getDeclaredField("isSaveExpect"))
+class RuleSuite extends AbstractSemanticRuleSuite with FunSpecLike with BeforeAndAfterAllConfigMapAlt {
+  val isSaveExpectField = ensureAccessible(classOf[AbstractSemanticRuleSuite].getDeclaredField("isSaveExpect"))
 
   // If you invoke the test as "tests/testOnly -- -Doverwrite=true" it will save the expected
   override protected def beforeAllAlt(configMap: ConfigMap) = {

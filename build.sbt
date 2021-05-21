@@ -15,6 +15,7 @@ inThisBuild(List(
     case None              => scala212
     case tsv               => sys.error(s"Unknown TRAVIS_SCALA_VERSION $tsv")
   }),
+  scalacOptions ++= List("-deprecation", "-feature", "-language:_", "-unchecked", "-Xlint"),
   crossScalaVersions := Seq(scala212, scala213),
   publish / skip := true,
 ))
