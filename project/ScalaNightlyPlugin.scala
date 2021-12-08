@@ -2,7 +2,7 @@ import sbt._, Keys._
 
 object ScalaNightlyPlugin extends AutoPlugin {
   val BinCompatV = """(\d+)\.(\d+)\.(\d+)(-\w+)??(-bin-.*)?""".r
-  val isScalaNightly = sys.env.get("TRAVIS_SCALA_VERSION").contains("2.12.next")
+  val isScalaNightly = sys.env.get("CI_SCALA_VERSION").contains("2.12.next")
   def ifNightly(ss: SettingsDefinition*) = if (isScalaNightly) Def.settings(ss: _*) else Nil
 
   override def buildSettings = ifNightly(
