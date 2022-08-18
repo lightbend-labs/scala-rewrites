@@ -1,7 +1,7 @@
 import _root_.scalafix.sbt.BuildInfo._
 import sbt.librarymanagement.Configurations.CompilerPlugin
 
-def scalametaVersion = "4.5.4"
+def scalametaVersion = "4.5.13"
 
 inThisBuild(List(
   organization := "org.scala-lang",
