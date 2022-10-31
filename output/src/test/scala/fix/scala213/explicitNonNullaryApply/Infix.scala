@@ -9,9 +9,9 @@ class Infix {
   qual() id qual()
   qual() id qual()
 
-  qual() id (qual())
-  qual() id ((qual()))
-  qual() id (((qual())))
+  qual() id (qual)
+  qual() id ((qual))
+  qual() id (((qual)))
 
   qual() id[Any] qual()
 }
