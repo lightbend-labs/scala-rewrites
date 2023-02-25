@@ -1,8 +1,6 @@
 import _root_.scalafix.sbt.BuildInfo._
 import sbt.librarymanagement.Configurations.CompilerPlugin
 
-def scalametaVersion = "4.6.0"
-
 inThisBuild(List(
   organization := "org.scala-lang",
   licenses := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
