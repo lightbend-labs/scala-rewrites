@@ -9,7 +9,7 @@ inThisBuild(List(
   scalaVersion := (sys.env.get("CI_SCALA_VERSION") match {
     case Some("2.13")      => scala213
     case Some("2.12")      => scala212
-    case Some("2.12.next") => scala212 // and then overriden by ScalaNightlyPlugin
+    case Some("2.12.next") => scala212 // and then overridden by ScalaNightlyPlugin
     case None              => scala212
     case tsv               => sys.error(s"Unknown CI_SCALA_VERSION $tsv")
   }),
