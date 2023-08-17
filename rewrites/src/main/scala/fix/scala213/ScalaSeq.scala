@@ -34,7 +34,7 @@ final class ScalaSeq(val config: ScalaSeq.Config) extends SemanticRule("fix.scal
         inParam = false
         apply(p.default)
 
-      case scalaSeq(Type.Apply(t, _)) =>
+      case scalaSeq(Type.Apply.Initial(t, _)) =>
         val sub = if (inParam) {
           paramImport.foreach(i => patch += globalImports.add(i))
           config.paramType
