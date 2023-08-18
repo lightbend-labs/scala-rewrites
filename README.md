@@ -6,7 +6,7 @@ Add the `sbt-scalafix` sbt plugin, with the SemanticDB compiler plugin enabled (
 
 ```scala
 // project/plugins.sbt
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.10.4")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.11.0")
 ```
 
 ```scala
@@ -22,13 +22,13 @@ inThisBuild(List(
 Then run the desired rewrite(s) ([official docs][2]), in sbt:
 
 ```scala
-> scalafixAll dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:0.1.2
+> scalafixAll dependency:fix.scala213.ExplicitNonNullaryApply@org.scala-lang:scala-rewrites:<version>
 ```
 
 You can also add the following to your `build.sbt`:
 
 ```scala
-ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "0.1.3"
+ThisBuild / scalafixDependencies += "org.scala-lang" %% "scala-rewrites" % "<version>"
 ```
 
 and then:
