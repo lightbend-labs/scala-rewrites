@@ -9,7 +9,7 @@ final class NullaryHashHash extends SemanticRule("fix.scala213.NullaryHashHash")
 
   override def fix(implicit doc: SemanticDocument) = {
     doc.tree.collect {
-      case expr @ Term.Apply(HashHash(fun), Nil) =>
+      case expr @ Term.Apply.Initial(HashHash(fun), Nil) =>
         Patch.removeTokens(expr.tokens.takeRight(expr.pos.end - fun.pos.end))
     }.asPatch
   }

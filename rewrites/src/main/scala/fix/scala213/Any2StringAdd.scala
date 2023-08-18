@@ -22,8 +22,8 @@ final class Any2StringAdd extends SemanticRule("fix.scala213.Any2StringAdd") {
 
   override def fix(implicit doc: SemanticDocument): Patch = {
     doc.tree.collect {
-      case any2stringaddPlusString(Term.ApplyInfix(lhs, _, _, _)) => wrapStringValueOf(lhs)
-      case primitivePlusString(Term.ApplyInfix(lhs, _, _, _)) => blankStringPlus(lhs)
+      case any2stringaddPlusString(Term.ApplyInfix.Initial(lhs, _, _, _)) => wrapStringValueOf(lhs)
+      case primitivePlusString(Term.ApplyInfix.Initial(lhs, _, _, _)) => blankStringPlus(lhs)
     }.asPatch
   }
 

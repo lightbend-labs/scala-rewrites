@@ -20,24 +20,24 @@ final class Core extends SemanticRule("fix.scala213.Core") {
 
     val platformArraycopy: Replacer = {
       case arraycopy(i: Importee)      => Patch.removeImportee(i)
-      case arraycopy(Term.Apply(t, _)) => replaceTree(t, "System.arraycopy")
+      case arraycopy(Term.Apply.Initial(t, _)) => replaceTree(t, "System.arraycopy")
     }
 
     val consoleRead: Replacer = {
-      case deprecatedConsoleReadBoolean(Term.Apply(t, _)) => stdInReplace(t, "readBoolean")
-      case deprecatedConsoleReadByte(   Term.Apply(t, _)) => stdInReplace(t, "readByte")
-      case deprecatedConsoleReadChar(   Term.Apply(t, _)) => stdInReplace(t, "readChar")
-      case deprecatedConsoleReadDouble( Term.Apply(t, _)) => stdInReplace(t, "readDouble")
-      case deprecatedConsoleReadFloat(  Term.Apply(t, _)) => stdInReplace(t, "readFloat")
-      case deprecatedConsoleReadInt(    Term.Apply(t, _)) => stdInReplace(t, "readInt")
-      case deprecatedConsoleReadLine(   Term.Apply(t, _)) => stdInReplace(t, "readLine")
-      case deprecatedConsoleReadLine1(  Term.Apply(t, _)) => stdInReplace(t, "readLine")
-      case deprecatedConsoleReadLong(   Term.Apply(t, _)) => stdInReplace(t, "readLong")
-      case deprecatedConsoleReadShort(  Term.Apply(t, _)) => stdInReplace(t, "readShort")
-      case deprecatedConsoleReadf(      Term.Apply(t, _)) => stdInReplace(t, "readf")
-      case deprecatedConsoleReadf1(     Term.Apply(t, _)) => stdInReplace(t, "readf1")
-      case deprecatedConsoleReadf2(     Term.Apply(t, _)) => stdInReplace(t, "readf2")
-      case deprecatedConsoleReadf3(     Term.Apply(t, _)) => stdInReplace(t, "readf3")
+      case deprecatedConsoleReadBoolean(Term.Apply.Initial(t, _)) => stdInReplace(t, "readBoolean")
+      case deprecatedConsoleReadByte(   Term.Apply.Initial(t, _)) => stdInReplace(t, "readByte")
+      case deprecatedConsoleReadChar(   Term.Apply.Initial(t, _)) => stdInReplace(t, "readChar")
+      case deprecatedConsoleReadDouble( Term.Apply.Initial(t, _)) => stdInReplace(t, "readDouble")
+      case deprecatedConsoleReadFloat(  Term.Apply.Initial(t, _)) => stdInReplace(t, "readFloat")
+      case deprecatedConsoleReadInt(    Term.Apply.Initial(t, _)) => stdInReplace(t, "readInt")
+      case deprecatedConsoleReadLine(   Term.Apply.Initial(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLine1(  Term.Apply.Initial(t, _)) => stdInReplace(t, "readLine")
+      case deprecatedConsoleReadLong(   Term.Apply.Initial(t, _)) => stdInReplace(t, "readLong")
+      case deprecatedConsoleReadShort(  Term.Apply.Initial(t, _)) => stdInReplace(t, "readShort")
+      case deprecatedConsoleReadf(      Term.Apply.Initial(t, _)) => stdInReplace(t, "readf")
+      case deprecatedConsoleReadf1(     Term.Apply.Initial(t, _)) => stdInReplace(t, "readf1")
+      case deprecatedConsoleReadf2(     Term.Apply.Initial(t, _)) => stdInReplace(t, "readf2")
+      case deprecatedConsoleReadf3(     Term.Apply.Initial(t, _)) => stdInReplace(t, "readf3")
     }
 
     private def stdInReplace(tree: Tree, name: String): Patch =

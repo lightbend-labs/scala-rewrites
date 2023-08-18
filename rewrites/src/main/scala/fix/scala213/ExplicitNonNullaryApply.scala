@@ -59,7 +59,7 @@ final class ExplicitNonNullaryApply(global: LazyValue[ScalafixGlobal])
         if handled.add(name)
         if noArgs
         if name.isReference
-        if !cond(name.parent) { case Some(Term.ApplyInfix(_, `name`, _, _)) => true }
+        if !cond(name.parent) { case Some(Term.ApplyInfix.Initial(_, `name`, _, _)) => true }
         if !tree.parent.exists(_.is[Term.Eta]) // else rewrites `meth _` to `meth() _`, or requires running ExplicitNullaryEtaExpansion first
         // HACK: In certain cases, `Symbol.info` may throw `MissingSymbolException` due to some unknown reason
         // If it happens, here we assume that this symbol has no info
